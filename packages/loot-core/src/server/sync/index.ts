@@ -343,6 +343,9 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         if (dataset === 'prefs') {
           prefsToSet[row] = value;
         } else {
+          // Keep track of which items have been added it in this sync
+          // so it knows whether they already exist in the db or not. We
+          // ignore any changes to the spreadsheet.
           added.add(dataset + row);
         }
       }
@@ -357,6 +360,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         currentMerkle = merkle.insert(currentMerkle, timestamp);
       }
 
+      // Special treatment for some synced prefs
       if (dataset === 'preferences' && row === 'budgetType') {
         void setBudgetType(value);
       }
@@ -366,6 +370,9 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   function persistClockIfSyncing() {
     if (checkSyncingMode('enabled')) {
       currentMerkle = merkle.prune(currentMerkle);
+
+      // Save the clock in the db first (queries might throw
+      // exceptions)
       db.runQuery(
         db.cache(
           'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
