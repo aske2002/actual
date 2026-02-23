@@ -363,20 +363,23 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     }
   }
 
+  function persistClockIfSyncing() {
+    if (checkSyncingMode('enabled')) {
+      currentMerkle = merkle.prune(currentMerkle);
+      db.runQuery(
+        db.cache(
+          'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
+        ),
+        [serializeClock({ ...clock, merkle: currentMerkle })],
+      );
+    }
+  }
+
   if (!useBatching) {
     // Single transaction for small syncs
     db.transaction(() => {
       applyChunk(messages);
-
-      if (checkSyncingMode('enabled')) {
-        currentMerkle = merkle.prune(currentMerkle);
-        db.runQuery(
-          db.cache(
-            'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-          ),
-          [serializeClock({ ...clock, merkle: currentMerkle })],
-        );
-      }
+      persistClockIfSyncing();
     });
   } else {
     // Batched transactions for large syncs (e.g. initial sync on mobile)
@@ -389,16 +392,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     for (const chunk of chunks) {
       db.transaction(() => {
         applyChunk(chunk);
-
-        if (checkSyncingMode('enabled')) {
-          currentMerkle = merkle.prune(currentMerkle);
-          db.runQuery(
-            db.cache(
-              'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-            ),
-            [serializeClock({ ...clock, merkle: currentMerkle })],
-          );
-        }
+        persistClockIfSyncing();
       });
 
       appliedSoFar += chunk.length;
@@ -413,6 +407,8 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   }
 
   if (checkSyncingMode('enabled')) {
+    // The transaction succeeded, so we can update in-memory objects
+    // now. Update the in-memory clock.
     clock.merkle = currentMerkle;
   }
 
