@@ -14,17 +14,17 @@ type SetMetadataPrefAction<K extends keyof MetadataPrefs> = (
 export function useMetadataPref<K extends keyof MetadataPrefs>(
   prefName: K,
 ): [MetadataPrefs[K], SetMetadataPrefAction<K>] {
-  const saveMetadataPrefMutation = useSaveMetadataPrefsMutation();
+  const { mutate: saveMetadataPrefs } = useSaveMetadataPrefsMutation();
   const saveMetadataPref: SetMetadataPrefAction<K> = value => {
-    saveMetadataPrefMutation.mutate({ [prefName]: value });
+    saveMetadataPrefs({ [prefName]: value });
   };
 
-  const metadataPrefsQuery = useQuery({
+  const { data: metadataPref } = useQuery({
     ...prefQueries.listMetadata(),
     select: prefs => prefs?.[prefName],
     enabled: !!prefName,
     notifyOnChangeProps: ['data'],
   });
 
-  return [metadataPrefsQuery.data as MetadataPrefs[K], saveMetadataPref];
+  return [metadataPref as MetadataPrefs[K], saveMetadataPref];
 }

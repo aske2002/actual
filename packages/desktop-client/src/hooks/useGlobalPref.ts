@@ -12,9 +12,9 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
   prefName: K,
   onSaveGlobalPrefs?: () => void,
 ): [GlobalPrefs[K], SetGlobalPrefAction<K>] {
-  const saveGlobalPrefsMutation = useSaveGlobalPrefsMutation();
+  const { mutate: saveGlobalPrefs } = useSaveGlobalPrefsMutation();
   const saveGlobalPref: SetGlobalPrefAction<K> = value => {
-    saveGlobalPrefsMutation.mutate(
+    saveGlobalPrefs(
       {
         [prefName]: value,
       },
@@ -24,12 +24,12 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
     );
   };
 
-  const globalPrefsQuery = useQuery({
+  const { data: globalPref } = useQuery({
     ...prefQueries.listGlobal(),
     select: prefs => prefs?.[prefName],
     enabled: !!prefName,
     notifyOnChangeProps: ['data'],
   });
 
-  return [globalPrefsQuery.data as GlobalPrefs[K], saveGlobalPref];
+  return [globalPref as GlobalPrefs[K], saveGlobalPref];
 }

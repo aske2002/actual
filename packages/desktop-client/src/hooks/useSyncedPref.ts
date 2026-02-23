@@ -11,17 +11,17 @@ type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
 export function useSyncedPref<K extends keyof SyncedPrefs>(
   prefName: K,
 ): [SyncedPrefs[K], SetSyncedPrefAction<K>] {
-  const saveSyncedPrefsMutation = useSaveSyncedPrefsMutation();
+  const { mutate: saveSyncedPrefs } = useSaveSyncedPrefsMutation();
   const saveSyncedPref: SetSyncedPrefAction<K> = value => {
-    saveSyncedPrefsMutation.mutate({ [prefName]: value });
+    saveSyncedPrefs({ [prefName]: value });
   };
 
-  const syncedPrefsQuery = useQuery({
+  const { data: syncedPref } = useQuery({
     ...prefQueries.listSynced(),
     select: prefs => prefs?.[prefName],
     enabled: !!prefName,
     notifyOnChangeProps: ['data'],
   });
 
-  return [syncedPrefsQuery.data as SyncedPrefs[K], saveSyncedPref];
+  return [syncedPref as SyncedPrefs[K], saveSyncedPref];
 }
