@@ -34,6 +34,12 @@ export { resetSync } from './reset';
 export { repairSync } from './repair';
 
 const FULL_SYNC_DELAY = 1000;
+
+// When applying more than this many sync messages, use batched transactions
+// to avoid blocking the event loop (e.g. on mobile). Smaller syncs use a
+// single transaction for consistency and performance.
+export const APPLY_MESSAGES_BATCH_SIZE = 5000;
+
 let SYNCING_MODE = 'enabled';
 type SyncingMode = 'enabled' | 'offline' | 'disabled' | 'import';
 
@@ -324,17 +330,11 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     sheet.get().startCacheBarrier();
   }
 
-  // Now that we have all of the data, go through and apply the
-  // messages carefully. This transaction is **crucial**: it
-  // guarantees that everything is atomically committed to the
-  // database, and if any part of it fails everything aborts and
-  // nothing is changed. This is critical to maintain consistency. We
-  // also avoid any side effects to in-memory objects, and apply them
-  // after this succeeds.
-  db.transaction(() => {
-    const added = new Set();
+  const useBatching = messages.length > APPLY_MESSAGES_BATCH_SIZE;
+  const added = new Set<string>();
 
-    for (const msg of messages) {
+  function applyChunk(chunk: Message[]) {
+    for (const msg of chunk) {
       const { dataset, row, column, timestamp, value } = msg;
 
       if (!msg.old) {
@@ -343,9 +343,6 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         if (dataset === 'prefs') {
           prefsToSet[row] = value;
         } else {
-          // Keep track of which items have been added it in this sync
-          // so it knows whether they already exist in the db or not. We
-          // ignore any changes to the spreadsheet.
           added.add(dataset + row);
         }
       }
@@ -360,29 +357,62 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         currentMerkle = merkle.insert(currentMerkle, timestamp);
       }
 
-      // Special treatment for some synced prefs
       if (dataset === 'preferences' && row === 'budgetType') {
         void setBudgetType(value);
       }
     }
+  }
 
-    if (checkSyncingMode('enabled')) {
-      currentMerkle = merkle.prune(currentMerkle);
+  if (!useBatching) {
+    // Single transaction for small syncs
+    db.transaction(() => {
+      applyChunk(messages);
 
-      // Save the clock in the db first (queries might throw
-      // exceptions)
-      db.runQuery(
-        db.cache(
-          'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-        ),
-        [serializeClock({ ...clock, merkle: currentMerkle })],
-      );
+      if (checkSyncingMode('enabled')) {
+        currentMerkle = merkle.prune(currentMerkle);
+        db.runQuery(
+          db.cache(
+            'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
+          ),
+          [serializeClock({ ...clock, merkle: currentMerkle })],
+        );
+      }
+    });
+  } else {
+    // Batched transactions for large syncs (e.g. initial sync on mobile)
+    const chunks: Message[][] = [];
+    for (let i = 0; i < messages.length; i += APPLY_MESSAGES_BATCH_SIZE) {
+      chunks.push(messages.slice(i, i + APPLY_MESSAGES_BATCH_SIZE));
     }
-  });
+
+    let appliedSoFar = 0;
+    for (const chunk of chunks) {
+      db.transaction(() => {
+        applyChunk(chunk);
+
+        if (checkSyncingMode('enabled')) {
+          currentMerkle = merkle.prune(currentMerkle);
+          db.runQuery(
+            db.cache(
+              'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
+            ),
+            [serializeClock({ ...clock, merkle: currentMerkle })],
+          );
+        }
+      });
+
+      appliedSoFar += chunk.length;
+      connection.send('sync-event', {
+        type: 'progress',
+        applied: appliedSoFar,
+        total: messages.length,
+      });
+
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+    }
+  }
 
   if (checkSyncingMode('enabled')) {
-    // The transaction succeeded, so we can update in-memory objects
-    // now. Update the in-memory clock.
     clock.merkle = currentMerkle;
   }
 

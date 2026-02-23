@@ -39,6 +39,11 @@ type SyncEvent = {
       type: 'start';
     }
   | {
+      type: 'progress';
+      applied: number;
+      total: number;
+    }
+  | {
       type: 'unauthorized';
     }
 );

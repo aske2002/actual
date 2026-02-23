@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { listen, send } from 'loot-core/platform/client/connection';
 
 import { accountQueries } from './accounts';
-import { resetSync, sync } from './app/appSlice';
+import { resetSync, setAppState, sync } from './app/appSlice';
 import { categoryQueries } from './budget';
 import {
   closeAndDownloadBudget,
@@ -19,6 +19,19 @@ import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
 export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
+  const unlistenProgress = listen('sync-event', event => {
+    if (event.type !== 'progress') {
+      return;
+    }
+
+    const percent = Math.round((event.applied / event.total) * 100);
+    store.dispatch(
+      setAppState({
+        loadingText: t('Applying sync... {{percent}}%', { percent }),
+      }),
+    );
+  });
+
   // TODO: Should this run on mobile too?
   const unlistenUnauthorized = listen('sync-event', async ({ type }) => {
     if (type === 'unauthorized') {
@@ -387,6 +400,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
   });
 
   return () => {
+    unlistenProgress();
     unlistenUnauthorized();
     unlistenSuccess();
   };

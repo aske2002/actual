@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import { getClock, Timestamp } from '@actual-app/crdt';
+import { vi } from 'vitest';
 
+import * as connection from '../../platform/server/connection';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
@@ -9,7 +11,13 @@ import * as mockSyncServer from '../tests/mockSyncServer';
 import * as encoder from './encoder';
 import { isError } from './utils';
 
-import { applyMessages, fullSync, sendMessages, setSyncingMode } from './index';
+import {
+  APPLY_MESSAGES_BATCH_SIZE,
+  applyMessages,
+  fullSync,
+  sendMessages,
+  setSyncingMode,
+} from './index';
 
 beforeEach(() => {
   mockSyncServer.reset();
@@ -149,6 +157,93 @@ describe('Sync', () => {
     if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(2);
     expect(mockSyncServer.getMessages().length).toBe(3);
+  });
+
+  it('should apply a large number of messages in batches (same result as single transaction)', async () => {
+    await prefs.loadPrefs();
+    await prefs.savePrefs({ groupId: 'group' });
+
+    const messageCount = APPLY_MESSAGES_BATCH_SIZE * 2 + 100;
+    const messages = [];
+
+    for (let i = 0; i < messageCount; i++) {
+      global.stepForwardInTime();
+      messages.push({
+        dataset: 'transactions',
+        row: 'tx-' + i,
+        column: 'amount',
+        value: 1000 + i,
+        timestamp: Timestamp.send(),
+      });
+    }
+
+    await applyMessages(messages);
+
+    const crdtRows = await db.all<db.DbCrdtMessage>(
+      'SELECT * FROM messages_crdt ORDER BY timestamp',
+    );
+    expect(crdtRows.length).toBe(messageCount);
+
+    const clockRows = await db.all<db.DbClockMessage>(
+      'SELECT * FROM messages_clock',
+    );
+    expect(clockRows.length).toBe(1);
+
+    expect(getClock().merkle).toBeDefined();
+  });
+
+  it('should emit progress sync-events when applying a large number of messages', async () => {
+    await prefs.loadPrefs();
+    await prefs.savePrefs({ groupId: 'group' });
+
+    const sendSpy = vi.spyOn(connection, 'send');
+
+    const messageCount = APPLY_MESSAGES_BATCH_SIZE * 2 + 100;
+    const messages = [];
+
+    for (let i = 0; i < messageCount; i++) {
+      global.stepForwardInTime();
+      messages.push({
+        dataset: 'transactions',
+        row: 'tx-progress-' + i,
+        column: 'amount',
+        value: 2000 + i,
+        timestamp: Timestamp.send(),
+      });
+    }
+
+    await applyMessages(messages);
+
+    const progressCalls = sendSpy.mock.calls.filter(
+      ([name, payload]) =>
+        name === 'sync-event' &&
+        payload &&
+        typeof payload === 'object' &&
+        'type' in payload &&
+        payload.type === 'progress',
+    );
+
+    expect(progressCalls.length).toBeGreaterThan(0);
+
+    const appliedValues = progressCalls
+      .map(([, payload]) => (payload as { applied: number }).applied)
+      .sort((a, b) => a - b);
+
+    for (let i = 0; i < appliedValues.length; i++) {
+      expect(appliedValues[i]).toBeGreaterThan(0);
+      expect(appliedValues[i]).toBeLessThanOrEqual(messageCount);
+    }
+
+    for (const [, payload] of progressCalls) {
+      const p = payload as { applied: number; total: number };
+      expect(p.total).toBe(messageCount);
+    }
+
+    for (let i = 1; i < appliedValues.length; i++) {
+      expect(appliedValues[i]).toBeGreaterThanOrEqual(appliedValues[i - 1]);
+    }
+
+    sendSpy.mockRestore();
   });
 });
 
