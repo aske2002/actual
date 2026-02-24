@@ -616,7 +616,10 @@ export function FilterEditor<T extends RuleConditionEntity>({
       dispatch={dispatch}
       onApply={cond => {
         // @ts-expect-error - fix me
-        cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
+        cond = unparseConditions({
+          ...cond,
+          type: FIELD_TYPES.get(cond.field),
+        });
 
         if (cond.type === 'date' && cond.options) {
           if (

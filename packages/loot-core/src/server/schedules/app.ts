@@ -3,7 +3,7 @@ import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 import { v4 as uuidv4 } from 'uuid';
 
-import { type WithRequired } from 'loot-core/types/util';
+import type { WithRequired } from 'loot-core/types/util';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';

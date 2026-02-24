@@ -292,7 +292,12 @@ export function TransactionList({
       await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
       onRefetch();
     },
-    [isLearnCategoriesEnabled, onRefetch, promptToConvertToSchedule],
+    [
+      isLearnCategoriesEnabled,
+      onRefetch,
+      promptToConvertToSchedule,
+      createSingleTimeScheduleFromTransaction,
+    ],
   );
 
   const onSave = useCallback(
@@ -348,7 +353,13 @@ export function TransactionList({
 
       await saveTransaction();
     },
-    [isLearnCategoriesEnabled, onChange, onRefetch, promptToConvertToSchedule],
+    [
+      isLearnCategoriesEnabled,
+      onChange,
+      onRefetch,
+      promptToConvertToSchedule,
+      createSingleTimeScheduleFromTransaction,
+    ],
   );
 
   const onAddSplit = useCallback(
@@ -436,7 +447,7 @@ export function TransactionList({
       }
       return newTransaction;
     },
-    [dispatch],
+    [dispatch, runRulesAsync],
   );
 
   const onManagePayees = useCallback(
