@@ -618,6 +618,7 @@ export function FilterEditor<T extends RuleConditionEntity>({
         // @ts-expect-error - fix me
         cond = unparseConditions({
           ...cond,
+          // @ts-expect-error - fix me
           type: FIELD_TYPES.get(cond.field),
         });
 

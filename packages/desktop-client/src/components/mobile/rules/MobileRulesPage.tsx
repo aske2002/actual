@@ -25,13 +25,11 @@ import { useRules } from '@desktop-client/hooks/useRules';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { useUrlParam } from '@desktop-client/hooks/useUrlParam';
-import { useDispatch } from '@desktop-client/redux';
 import { useDeleteRuleMutation } from '@desktop-client/rules';
 
 export function MobileRulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const [visibleRulesParam] = useUrlParam('visible-rules');
   const [filter, setFilter] = useState('');

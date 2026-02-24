@@ -66,14 +66,11 @@ import {
   SelectedProvider,
   useSelected,
 } from '@desktop-client/hooks/useSelected';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 import {
-  useAddRuleMutation,
   useApplyRuleActionsMutation,
   useSaveRuleMutation,
-  useUpdateRuleMutation,
 } from '@desktop-client/rules';
 import { disableUndo, enableUndo } from '@desktop-client/undo';
 

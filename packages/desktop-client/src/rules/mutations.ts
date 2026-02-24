@@ -266,7 +266,7 @@ export function useCreateSingleTimeScheduleFromTransaction() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { data: allRules = [] } = useRules();
-  const { mutateAsync: updateRule } = useUpdateRuleMutation();
+  const { mutateAsync: updateRuleAsync } = useUpdateRuleMutation();
 
   return useMutation({
     mutationFn: async ({
@@ -386,7 +386,7 @@ export function useCreateSingleTimeScheduleFromTransaction() {
               a => a.op === 'link-schedule',
             );
 
-            updateRule({
+            await updateRuleAsync({
               rule: {
                 ...rule,
                 actions: [...linkScheduleActions, ...actions],
