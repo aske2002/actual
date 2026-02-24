@@ -12,7 +12,11 @@ import { View } from '@actual-app/components/view';
 import { send, sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import type { RecurConfig, ScheduleEntity } from 'loot-core/types/models';
+import type {
+  RecurConfig,
+  RuleConditionEntity,
+  ScheduleEntity,
+} from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';

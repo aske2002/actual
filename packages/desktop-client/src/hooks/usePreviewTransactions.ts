@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { send } from 'loot-core/platform/client/connection';
 import { computeSchedulePreviewTransactions } from 'loot-core/shared/schedules';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
 import type { IntegerAmount } from 'loot-core/shared/util';
@@ -9,6 +8,8 @@ import type { ScheduleEntity, TransactionEntity } from 'loot-core/types/models';
 import { useCachedSchedules } from './useCachedSchedules';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
+
+import { useRunRulesMutation } from '@desktop-client/rules/mutations';
 
 type UsePreviewTransactionsProps = {
   filter?: (schedule: ScheduleEntity) => boolean;
@@ -72,6 +73,8 @@ export function usePreviewTransactions({
     );
   }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
 
+  const { mutateAsync: runRulesAsync } = useRunRulesMutation();
+
   useEffect(() => {
     let isUnmounted = false;
 
@@ -88,7 +91,7 @@ export function usePreviewTransactions({
     Promise.all(
       scheduleTransactions.map(transaction =>
         // Kick off an async rules application
-        send('rules-run', { transaction }),
+        runRulesAsync({ transaction }),
       ),
     )
       .then(newTrans => {

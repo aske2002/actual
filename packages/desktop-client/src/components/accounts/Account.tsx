@@ -83,6 +83,7 @@ import { pagedQuery } from '@desktop-client/queries/pagedQuery';
 import type { PagedQuery } from '@desktop-client/queries/pagedQuery';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 import type { AppDispatch } from '@desktop-client/redux/store';
+import { useRunRulesMutation } from '@desktop-client/rules/mutations';
 import { updateNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
@@ -251,6 +252,7 @@ type AccountInternalProps = {
   onUnlinkAccount: (id: AccountEntity['id']) => void;
   onSyncAndDownload: (accountId?: AccountEntity['id']) => void;
   onCreatePayee: (name: PayeeEntity['name']) => Promise<PayeeEntity['id']>;
+  onRunRules: (transaction: TransactionEntity) => Promise<TransactionEntity>;
 };
 
 type AccountInternalState = {
@@ -691,9 +693,8 @@ class AccountInternal extends PureComponent<
       const allErrors: string[] = [];
 
       for (const transaction of transactions) {
-        const res: TransactionEntity | null = await send('rules-run', {
-          transaction,
-        });
+        const res: TransactionEntity | null =
+          await this.props.onRunRules(transaction);
         if (res) {
           changedTransactions.push(...ungroupTransaction(res));
 
@@ -1055,10 +1056,9 @@ class AccountInternal extends PureComponent<
     });
 
     // run rules on the reconciliation transaction
+    const runRules = this.props.onRunRules;
     const ruledTransactions = await Promise.all(
-      reconciliationTransactions.map(transaction =>
-        send('rules-run', { transaction }),
-      ),
+      reconciliationTransactions.map(transaction => runRules(transaction)),
     );
 
     // sync the reconciliation transaction
@@ -2017,9 +2017,13 @@ export function Account() {
   const onSyncAndDownload = (id?: AccountEntity['id']) =>
     syncAndDownload({ id });
 
-  const createPayee = useCreatePayeeMutation();
+  const { mutateAsync: createPayeeAsync } = useCreatePayeeMutation();
   const onCreatePayee = (name: PayeeEntity['name']) =>
-    createPayee.mutateAsync({ name });
+    createPayeeAsync({ name });
+
+  const { mutateAsync: runRulesAsync } = useRunRulesMutation();
+  const onRunRules = (transaction: TransactionEntity) =>
+    runRulesAsync({ transaction });
 
   return (
     <SchedulesProvider query={schedulesQuery}>
@@ -2062,6 +2066,7 @@ export function Account() {
           onUnlinkAccount={onUnlinkAccount}
           onSyncAndDownload={onSyncAndDownload}
           onCreatePayee={onCreatePayee}
+          onRunRules={onRunRules}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

@@ -8,7 +8,6 @@ import { theme } from '@actual-app/components/theme';
 
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
 import { getUpcomingDays } from 'loot-core/shared/schedules';
 import {
   addSplitTransaction,
@@ -22,7 +21,6 @@ import type {
   AccountEntity,
   CategoryEntity,
   PayeeEntity,
-  RuleActionEntity,
   RuleConditionEntity,
   ScheduleEntity,
   TransactionEntity,
@@ -38,6 +36,10 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import {
+  useCreateSingleTimeScheduleFromTransaction,
+  useRunRulesMutation,
+} from '@desktop-client/rules';
 
 // When data changes, there are two ways to update the UI:
 //
@@ -80,133 +82,6 @@ async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
     // @ts-expect-error - fix me
     applyChanges(remoteDiff, changes.data),
   );
-}
-
-export async function createSingleTimeScheduleFromTransaction(
-  transaction: TransactionEntity,
-): Promise<ScheduleEntity['id']> {
-  const conditions: RuleConditionEntity[] = [
-    { op: 'is', field: 'date', value: transaction.date },
-  ];
-
-  const actions: RuleActionEntity[] = [];
-
-  const conditionFields = ['amount', 'payee', 'account'];
-
-  conditionFields.forEach(field => {
-    const value = transaction[field];
-    if (value != null && value !== '') {
-      conditions.push({
-        op: 'is',
-        field,
-        value,
-      } as RuleConditionEntity);
-    }
-  });
-
-  if (transaction.is_parent && transaction.subtransactions) {
-    if (transaction.notes) {
-      actions.push({
-        op: 'set',
-        field: 'notes',
-        value: transaction.notes,
-        options: {
-          splitIndex: 0,
-        },
-      } as RuleActionEntity);
-    }
-
-    transaction.subtransactions.forEach((split, index) => {
-      const splitIndex = index + 1;
-
-      if (split.amount != null) {
-        actions.push({
-          op: 'set-split-amount',
-          value: split.amount,
-          options: {
-            splitIndex,
-            method: 'fixed-amount',
-          },
-        } as RuleActionEntity);
-      }
-
-      if (split.category) {
-        actions.push({
-          op: 'set',
-          field: 'category',
-          value: split.category,
-          options: {
-            splitIndex,
-          },
-        } as RuleActionEntity);
-      }
-
-      if (split.notes) {
-        actions.push({
-          op: 'set',
-          field: 'notes',
-          value: split.notes,
-          options: {
-            splitIndex,
-          },
-        } as RuleActionEntity);
-      }
-    });
-  } else {
-    if (transaction.category) {
-      actions.push({
-        op: 'set',
-        field: 'category',
-        value: transaction.category,
-      } as RuleActionEntity);
-    }
-
-    if (transaction.notes) {
-      actions.push({
-        op: 'set',
-        field: 'notes',
-        value: transaction.notes,
-      } as RuleActionEntity);
-    }
-  }
-
-  const formattedDate = monthUtils.format(transaction.date, 'MMM dd, yyyy');
-  const timestamp = Date.now();
-  const scheduleName = `Auto-created future transaction (${formattedDate}) - ${timestamp}`;
-
-  const scheduleId = await send('schedule/create', {
-    conditions,
-    schedule: {
-      posts_transaction: true,
-      name: scheduleName,
-    },
-  });
-
-  if (actions.length > 0) {
-    const schedules = await send(
-      'query',
-      q('schedules').filter({ id: scheduleId }).select('rule').serialize(),
-    );
-
-    const ruleId = schedules?.data?.[0]?.rule;
-
-    if (ruleId) {
-      const rule = await send('rule-get', { id: ruleId });
-
-      if (rule) {
-        const linkScheduleActions = rule.actions.filter(
-          a => a.op === 'link-schedule',
-        );
-
-        await send('rule-update', {
-          ...rule,
-          actions: [...linkScheduleActions, ...actions],
-        });
-      }
-    }
-  }
-
-  return scheduleId;
 }
 
 function isFutureTransaction(transaction: TransactionEntity): boolean {
@@ -375,6 +250,9 @@ export function TransactionList({
     [dispatch, onRefetch, upcomingLength, t],
   );
 
+  const { mutate: createSingleTimeScheduleFromTransaction } =
+    useCreateSingleTimeScheduleFromTransaction();
+
   const onAdd = useCallback(
     async (newTransactions: TransactionEntity[]) => {
       newTransactions = realizeTempTransactions(newTransactions);
@@ -397,9 +275,9 @@ export function TransactionList({
         promptToConvertToSchedule(
           transactionWithSubtransactions,
           async () => {
-            await createSingleTimeScheduleFromTransaction(
-              transactionWithSubtransactions,
-            );
+            createSingleTimeScheduleFromTransaction({
+              transaction: transactionWithSubtransactions,
+            });
           },
           async () => {
             await saveDiff(
@@ -460,7 +338,7 @@ export function TransactionList({
                 await send('transaction-delete', { id: transaction.id });
               }
 
-              await createSingleTimeScheduleFromTransaction(transaction);
+              createSingleTimeScheduleFromTransaction({ transaction });
             },
             saveTransaction,
           );
@@ -503,12 +381,14 @@ export function TransactionList({
     [isLearnCategoriesEnabled, onChange],
   );
 
+  const { mutateAsync: runRulesAsync } = useRunRulesMutation();
+
   const onApplyRules = useCallback(
     async (
       transaction: TransactionEntity,
       updatedFieldName: string | null = null,
     ) => {
-      const afterRules = await send('rules-run', { transaction });
+      const afterRules = await runRulesAsync({ transaction });
 
       // Show formula errors if any
       if (afterRules._ruleErrors && afterRules._ruleErrors.length > 0) {

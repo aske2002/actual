@@ -17,8 +17,8 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useDeleteRuleMutation } from '@desktop-client/rules/mutations';
 
 export function MobileRuleEditPage() {
   const { t } = useTranslation();
@@ -107,6 +107,8 @@ export function MobileRuleEditPage() {
     void navigate(-1);
   };
 
+  const { mutate: deleteRule } = useDeleteRuleMutation();
+
   const handleDelete = () => {
     // Runtime guard to ensure id exists
     if (!id || id === 'new') {
@@ -120,23 +122,17 @@ export function MobileRuleEditPage() {
           options: {
             message: t('Are you sure you want to delete this rule?'),
             onConfirm: async () => {
-              try {
-                await send('rule-delete', id);
-                showUndoNotification({
-                  message: t('Rule deleted successfully'),
-                });
-                void navigate('/rules');
-              } catch (error) {
-                console.error('Failed to delete rule:', error);
-                dispatch(
-                  addNotification({
-                    notification: {
-                      type: 'error',
-                      message: t('Failed to delete rule. Please try again.'),
-                    },
-                  }),
-                );
-              }
+              deleteRule(
+                { id },
+                {
+                  onSuccess: () => {
+                    showUndoNotification({
+                      message: t('Rule deleted successfully'),
+                    });
+                    void navigate('/rules');
+                  },
+                },
+              );
             },
           },
         },

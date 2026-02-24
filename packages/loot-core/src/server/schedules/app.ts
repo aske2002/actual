@@ -3,6 +3,8 @@ import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 import { v4 as uuidv4 } from 'uuid';
 
+import { type WithRequired } from 'loot-core/types/util';
+
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
@@ -17,7 +19,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import type { ScheduleEntity } from '../../types/models';
+import type { RuleConditionEntity, ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -184,10 +186,13 @@ async function checkIfScheduleExists(name, scheduleId) {
 }
 
 export async function createSchedule({
-  schedule = null,
+  schedule = {},
   conditions = [],
-} = {}): Promise<ScheduleEntity['id']> {
-  const scheduleId = schedule?.id || uuidv4();
+}: {
+  schedule?: Partial<Omit<ScheduleEntity, 'id'>>;
+  conditions?: RuleConditionEntity[];
+}): Promise<ScheduleEntity['id']> {
+  const scheduleId = uuidv4();
 
   const { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
@@ -199,14 +204,12 @@ export async function createSchedule({
 
   const nextDate = getNextDate(dateCond);
   const nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
-  if (schedule) {
-    if (schedule.name) {
-      if (await checkIfScheduleExists(schedule.name, scheduleId)) {
-        throw new Error('Cannot create schedules with the same name');
-      }
-    } else {
-      schedule.name = null;
+  if (schedule.name) {
+    if (await checkIfScheduleExists(schedule.name, scheduleId)) {
+      throw new Error('Cannot create schedules with the same name');
     }
+  } else {
+    schedule.name = null;
   }
 
   // Create the rule here based on the info
@@ -242,8 +245,8 @@ export async function updateSchedule({
   conditions,
   resetNextDate,
 }: {
-  schedule;
-  conditions?;
+  schedule: WithRequired<Partial<ScheduleEntity>, 'id'>;
+  conditions?: RuleConditionEntity[];
   resetNextDate?: boolean;
 }) {
   if (schedule.rule) {

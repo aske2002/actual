@@ -28,7 +28,7 @@ import {
   getFieldError,
   getValidOps,
   mapField,
-  unparse,
+  unparseConditions,
 } from 'loot-core/shared/rules';
 import { titleFirst } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
@@ -296,37 +296,39 @@ function ConfigureField<T extends RuleConditionEntity>({
           });
         }}
       >
-        {type !== 'boolean' && (field !== 'payee' || !isPayeeIdOp(op)) && (
-          <GenericInput
-            ref={inputRef}
-            // @ts-expect-error - fix me
-            field={field === 'date' || field === 'category' ? subfield : field}
-            // @ts-expect-error - fix me
-            type={
-              type === 'id' &&
-              (op === 'contains' ||
-                op === 'matches' ||
-                op === 'doesNotContain' ||
-                op === 'hasTags')
-                ? 'string'
-                : type
-            }
-            numberFormatType="currency"
-            // @ts-expect-error - fix me
-            value={
-              formattedValue ?? (op === 'oneOf' || op === 'notOneOf' ? [] : '')
-            }
-            // @ts-expect-error - fix me
-            multi={op === 'oneOf' || op === 'notOneOf'}
-            op={op}
-            options={subfieldToOptions(field, subfield)}
-            style={{ marginTop: 10 }}
-            // oxlint-disable-next-line typescript/no-explicit-any
-            onChange={(v: any) => {
-              dispatch({ type: 'set-value', value: v });
-            }}
-          />
-        )}
+        {type &&
+          type !== 'boolean' &&
+          (field !== 'payee' || !isPayeeIdOp(op)) && (
+            <GenericInput
+              ref={inputRef}
+              field={
+                field === 'date' || field === 'category' ? subfield : field
+              }
+              type={
+                type === 'id' &&
+                (op === 'contains' ||
+                  op === 'matches' ||
+                  op === 'doesNotContain' ||
+                  op === 'hasTags')
+                  ? 'string'
+                  : type
+              }
+              numberFormatType="currency"
+              // @ts-expect-error - fix me
+              value={
+                formattedValue ??
+                (op === 'oneOf' || op === 'notOneOf' ? [] : '')
+              }
+              multi={op === 'oneOf' || op === 'notOneOf'}
+              op={op}
+              options={subfieldToOptions(field, subfield)}
+              style={{ marginTop: 10 }}
+              // oxlint-disable-next-line typescript/no-explicit-any
+              onChange={(v: any) => {
+                dispatch({ type: 'set-value', value: v });
+              }}
+            />
+          )}
 
         {field === 'payee' && isPayeeIdOp(op) && (
           <PayeeFilter
@@ -424,7 +426,7 @@ export function FilterButton<T extends RuleConditionEntity>({
 
   async function onValidateAndApply(cond: T) {
     // @ts-expect-error - fix me
-    cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
+    cond = unparseConditions({ ...cond, type: FIELD_TYPES.get(cond.field) });
 
     if (cond.type === 'date' && cond.options) {
       if (cond.options.month) {

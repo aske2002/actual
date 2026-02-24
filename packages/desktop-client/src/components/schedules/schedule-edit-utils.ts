@@ -1,14 +1,18 @@
 import { t } from 'i18next';
 
 import { extractScheduleConds } from 'loot-core/shared/schedules';
-import type { RuleConditionOp, ScheduleEntity } from 'loot-core/types/models';
+import type {
+  RuleConditionEntity,
+  RuleConditionOp,
+  ScheduleEntity,
+} from 'loot-core/types/models';
 
 import type { ScheduleFormFields } from './ScheduleEditForm';
 
 export function updateScheduleConditions(
   schedule: Partial<ScheduleEntity>,
   fields: ScheduleFormFields,
-): { error?: string; conditions?: unknown[] } {
+): { error?: string; conditions?: RuleConditionEntity[] } {
   const conds = extractScheduleConds(schedule._conditions);
 
   const updateCond = (

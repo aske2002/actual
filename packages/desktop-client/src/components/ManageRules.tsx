@@ -1,16 +1,16 @@
 // @ts-strict-ignore
 import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
@@ -30,7 +30,9 @@ import { RulesList } from './rules/RulesList';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { usePayeeRules } from '@desktop-client/hooks/usePayeeRules';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useRules } from '@desktop-client/hooks/useRules';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProvider,
@@ -38,6 +40,10 @@ import {
 } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import {
+  useBatchDeleteRulesMutation,
+  useDeleteRuleMutation,
+} from '@desktop-client/rules';
 
 export type FilterData = {
   payees?: Array<{ id: string; name: string }>;
@@ -115,17 +121,36 @@ export function ruleToString(rule: RuleEntity, data: FilterData) {
 type ManageRulesProps = {
   isModal: boolean;
   payeeId: string | null;
-  setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
-export function ManageRules({
-  isModal,
-  payeeId,
-  setLoading = () => {},
-}: ManageRulesProps) {
+export function ManageRules({ isModal, payeeId }: ManageRulesProps) {
   const { t } = useTranslation();
 
-  const [allRules, setAllRules] = useState<RuleEntity[]>([]);
+  const {
+    data: allRules = [],
+    refetch: refetchAllRules,
+    isLoading: isAllRulesLoading,
+    isRefetching: isAllRulesRefetching,
+  } = useRules({
+    enabled: !payeeId,
+  });
+  const {
+    data: payeeRules = [],
+    refetch: refetchPayeeRules,
+    isLoading: isPayeeRulesLoading,
+    isRefetching: isPayeeRulesRefetching,
+  } = usePayeeRules({
+    payeeId,
+  });
+
+  const rulesToUse = payeeId ? payeeRules : allRules;
+  const refetchRules = payeeId ? refetchPayeeRules : refetchAllRules;
+  const isLoading =
+    isAllRulesLoading ||
+    isAllRulesRefetching ||
+    isPayeeRulesLoading ||
+    isPayeeRulesRefetching;
+
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
@@ -147,7 +172,7 @@ export function ManageRules({
   );
 
   const filteredRules = useMemo(() => {
-    const rules = allRules.filter(rule => {
+    const rules = rulesToUse.filter(rule => {
       const schedule = schedules.find(schedule => schedule.rule === rule.id);
       return schedule ? schedule.completed === false : true;
     });
@@ -161,7 +186,7 @@ export function ManageRules({
             ),
           )
     ).slice(0, 100 + page * 50);
-  }, [allRules, filter, filterData, page, schedules]);
+  }, [rulesToUse, filter, filterData, page, schedules]);
 
   const selectedInst = useSelected('manage-rules', filteredRules, []);
   const [hoveredRule, setHoveredRule] = useState(null);
@@ -171,38 +196,16 @@ export function ManageRules({
     setPage(0);
   };
 
-  async function loadRules() {
-    setLoading(true);
-
-    let loadedRules = null;
-    if (payeeId) {
-      loadedRules = await send('payees-get-rules', {
-        id: payeeId,
-      });
-    } else {
-      loadedRules = await send('rules-get');
-    }
-
-    setAllRules(loadedRules);
-    return loadedRules;
-  }
-
   const init = useEffectEvent(() => {
-    async function loadData() {
-      await loadRules();
-      setLoading(false);
-    }
-
     if (payeeId) {
       undo.setUndoState('openModal', { name: 'manage-rules', options: {} });
     }
-
-    void loadData();
 
     return () => {
       undo.setUndoState('openModal', null);
     };
   });
+
   useEffect(() => {
     return init();
   }, []);
@@ -211,29 +214,33 @@ export function ManageRules({
     setPage(page => page + 1);
   }
 
+  const { mutate: batchDeleteRules } = useBatchDeleteRulesMutation();
+
   const onDeleteSelected = async () => {
-    setLoading(true);
-
-    const { someDeletionsFailed } = await send('rule-delete-all', [
-      ...selectedInst.items,
-    ]);
-
-    if (someDeletionsFailed) {
-      alert(
-        t('Some rules were not deleted because they are linked to schedules.'),
-      );
-    }
-
-    await loadRules();
-    selectedInst.dispatch({ type: 'select-none' });
-    setLoading(false);
+    batchDeleteRules(
+      {
+        ids: [...selectedInst.items],
+      },
+      {
+        onSuccess: () => {
+          void refetchRules();
+          selectedInst.dispatch({ type: 'select-none' });
+        },
+      },
+    );
   };
 
+  const { mutate: deleteRule } = useDeleteRuleMutation();
+
   async function onDeleteRule(id: string) {
-    setLoading(true);
-    await send('rule-delete', id);
-    await loadRules();
-    setLoading(false);
+    await deleteRule(
+      { id },
+      {
+        onSuccess: () => {
+          void refetchRules();
+        },
+      },
+    );
   }
 
   const onEditRule = rule => {
@@ -244,8 +251,7 @@ export function ManageRules({
           options: {
             rule,
             onSave: async () => {
-              await loadRules();
-              setLoading(false);
+              void refetchRules();
             },
           },
         },
@@ -282,8 +288,7 @@ export function ManageRules({
           options: {
             rule,
             onSave: async () => {
-              await loadRules();
-              setLoading(false);
+              void refetchRules();
             },
           },
         },
@@ -294,6 +299,24 @@ export function ManageRules({
   const onHover = id => {
     setHoveredRule(id);
   };
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <AnimatedLoading width={25} height={25} />
+      </View>
+    );
+  }
+
+  const isNonDeletableRuleSelected = schedules.some(schedule =>
+    selectedInst.items.has(schedule.rule),
+  );
 
   return (
     <SelectedProvider instance={selectedInst}>
@@ -361,11 +384,21 @@ export function ManageRules({
         >
           <SpaceBetween gap={10} style={{ justifyContent: 'flex-end' }}>
             {selectedInst.items.size > 0 && (
-              <Button onPress={onDeleteSelected}>
-                <Trans count={selectedInst.items.size}>
-                  Delete {{ count: selectedInst.items.size }} rules
-                </Trans>
-              </Button>
+              <Tooltip
+                isOpen={isNonDeletableRuleSelected}
+                content={t(
+                  'Some selected rules cannot be deleted because they are linked to schedules.',
+                )}
+              >
+                <Button
+                  onPress={onDeleteSelected}
+                  // isDisabled={isNonDeletableRuleSelected}
+                >
+                  <Trans count={selectedInst.items.size}>
+                    Delete {{ count: selectedInst.items.size }} rules
+                  </Trans>
+                </Button>
+              </Tooltip>
             )}
             <Button variant="primary" onPress={onCreateRule}>
               <Trans>Create new rule</Trans>

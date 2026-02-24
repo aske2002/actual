@@ -14,7 +14,7 @@ import { usePayeesById } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 
 type ScheduleValueProps = {
-  value: ScheduleEntity;
+  value: ScheduleEntity['id'];
 };
 
 export function ScheduleValue({ value }: ScheduleValueProps) {
@@ -35,12 +35,13 @@ export function ScheduleValue({ value }: ScheduleValueProps) {
     <Value
       value={value}
       field="rule"
-      data={schedules}
-      // TODO: this manual type coercion does not make much sense -
-      // should we instead do `schedule._payee.id`?
-      describe={schedule =>
-        describeSchedule(schedule, byId[schedule._payee as unknown as string])
-      }
+      describe={val => {
+        const schedule = schedules.find(s => s.id === val);
+        if (!schedule) {
+          return t('(deleted)');
+        }
+        return describeSchedule(schedule, byId[schedule._payee]);
+      }}
     />
   );
 }

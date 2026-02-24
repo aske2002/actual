@@ -72,7 +72,6 @@ import {
 } from '@desktop-client/components/mobile/MobileForms';
 import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { createSingleTimeScheduleFromTransaction } from '@desktop-client/components/transactions/TransactionList';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -90,6 +89,10 @@ import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch, useSelector } from '@desktop-client/redux';
+import {
+  useCreateSingleTimeScheduleFromTransaction,
+  useRunRulesMutation,
+} from '@desktop-client/rules';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
@@ -671,6 +674,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [categories, isBudgetTransfer, t],
     );
 
+    const { mutate: createSingleTimeScheduleFromTransaction } =
+      useCreateSingleTimeScheduleFromTransaction();
+
     const onSaveInner = useCallback(() => {
       const [unserializedTransaction] = unserializedTransactions;
 
@@ -730,18 +736,23 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       : unserializedTransaction;
 
                   await createSingleTimeScheduleFromTransaction(
-                    transactionForSchedule,
-                  );
-
-                  dispatch(
-                    addNotification({
-                      notification: {
-                        type: 'message',
-                        message: t('Schedule created successfully'),
+                    {
+                      transaction: transactionForSchedule,
+                    },
+                    {
+                      onSuccess: () => {
+                        dispatch(
+                          addNotification({
+                            notification: {
+                              type: 'message',
+                              message: t('Schedule created successfully'),
+                            },
+                          }),
+                        );
+                        void navigate(-1);
                       },
-                    }),
+                    },
                   );
-                  void navigate(-1);
                 },
                 onCancel: onConfirmSave,
               },
@@ -1407,6 +1418,8 @@ function TransactionEditUnconnected({
     searchParams,
   ]);
 
+  const { mutateAsync: runRulesAsync } = useRunRulesMutation();
+
   const onUpdate = useCallback(
     async (
       serializedTransaction: TransactionEntity,
@@ -1422,9 +1435,7 @@ function TransactionEditUnconnected({
       // this on new transactions because that's how desktop works.
       const newTransaction = { ...transaction };
       if (isTemporary(newTransaction)) {
-        const afterRules = await send('rules-run', {
-          transaction: newTransaction,
-        });
+        const afterRules = await runRulesAsync({ transaction: newTransaction });
         const diff = getChangedValues(newTransaction, afterRules);
 
         if (diff) {

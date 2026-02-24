@@ -37,8 +37,10 @@ import {
   isValidOp,
   makeValue,
   mapField,
-  parse,
-  unparse,
+  parseActions,
+  parseConditions,
+  unparseActions,
+  unparseConditions,
 } from 'loot-core/shared/rules';
 import type { ScheduleStatusType } from 'loot-core/shared/schedules';
 import type {
@@ -46,6 +48,7 @@ import type {
   RuleActionEntity,
   RuleEntity,
 } from 'loot-core/types/models';
+import type { WithOptional } from 'loot-core/types/util';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
@@ -66,6 +69,12 @@ import {
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
+import {
+  useAddRuleMutation,
+  useApplyRuleActionsMutation,
+  useSaveRuleMutation,
+  useUpdateRuleMutation,
+} from '@desktop-client/rules';
 import { disableUndo, enableUndo } from '@desktop-client/undo';
 
 function updateValue(array, value, update) {
@@ -958,7 +967,7 @@ function ConditionsList({
 }
 
 const getActions = splits => splits.flatMap(s => s.actions);
-const getUnparsedActions = splits => getActions(splits).map(unparse);
+const getUnparsedActions = splits => getActions(splits).map(unparseActions);
 
 // TODO:
 // * Dont touch child transactions?
@@ -996,19 +1005,29 @@ export function RuleEditor({
 }: RuleEditorProps) {
   const { t } = useTranslation();
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
+    defaultRule.conditions
+      .map(parseConditions)
+      .map(c => ({ ...c, inputKey: uuid() })),
   );
-  const [actionSplits, setActionSplits] = useState(() => {
-    const parsedActions = defaultRule.actions.map(parse);
+  const [actionSplits, setActionSplits] = useState<
+    Array<{
+      id: string;
+      actions: Array<RuleActionEntity & { inputKey: string }>;
+    }>
+  >(() => {
+    const parsedActions = defaultRule.actions.map(parseActions);
     return parsedActions.reduce(
       (acc, action) => {
-        const splitIndex = action.options?.splitIndex ?? 0;
+        const splitIndex =
+          'options' in action && 'splitIndex' in action.options
+            ? (action.options.splitIndex ?? 0)
+            : 0;
         acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
         acc[splitIndex].actions.push({ ...action, inputKey: uuid() });
         return acc;
       },
       // The pre-split group is always there
-      [{ id: uuid(), actions: [] }],
+      [{ id: uuid(), actions: [] } as (typeof actionSplits)[0]],
     );
   });
   const [stage, setStage] = useState(defaultRule.stage);
@@ -1039,7 +1058,7 @@ export function RuleEditor({
     // Run it here
     async function run() {
       const { filters } = await send('make-filters-from-conditions', {
-        conditions: conditions.map(unparse),
+        conditions: conditions.map(unparseConditions),
       });
 
       if (filters.length > 0) {
@@ -1211,74 +1230,67 @@ export function RuleEditor({
     });
   }
 
+  const { mutate: applyRuleActions } = useApplyRuleActionsMutation();
+
   function onApply() {
     const selectedTransactions = transactions.filter(({ id }) =>
       selectedInst.items.has(id),
     );
-    void send('rule-apply-actions', {
-      transactions: selectedTransactions,
-      actions: getUnparsedActions(actionSplits),
-    }).then(content => {
-      // This makes it refetch the transactions
-      content.errors.forEach(error => {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: error,
-            },
-          }),
-        );
-      });
-      setActionSplits([...actionSplits]);
-    });
+    applyRuleActions(
+      {
+        transactions: selectedTransactions,
+        ruleActions: getUnparsedActions(actionSplits),
+      },
+      {
+        onSuccess: () => {
+          setActionSplits([...actionSplits]);
+        },
+      },
+    );
   }
 
+  const { mutate: saveRule } = useSaveRuleMutation();
+
   async function onSave() {
-    const rule = {
+    const rule: WithOptional<RuleEntity, 'id'> = {
       ...defaultRule,
       stage,
       conditionsOp,
-      conditions: conditions.map(unparse),
+      conditions: conditions.map(unparseConditions),
       actions: getUnparsedActions(actionSplits),
     };
 
-    // @ts-expect-error fix this
-    const method = rule.id ? 'rule-update' : 'rule-add';
-    // @ts-expect-error fix this
-    const { error, id: newId } = await send(method, rule);
+    saveRule(
+      {
+        rule,
+      },
+      {
+        onSuccess: ({ id }) => {
+          originalOnSave?.({
+            id,
+            ...rule,
+          });
+        },
+        onError: error => {
+          if ('conditionErrors' in error && error.conditionErrors) {
+            setConditions(applyErrors(conditions, error.conditionErrors));
+          }
 
-    if (error) {
-      // @ts-expect-error fix this
-      if (error.conditionErrors) {
-        // @ts-expect-error fix this
-        setConditions(applyErrors(conditions, error.conditionErrors));
-      }
-
-      // @ts-expect-error fix this
-      if (error.actionErrors) {
-        let usedErrorIdx = 0;
-        setActionSplits(
-          actionSplits.map(item => ({
-            ...item,
-            actions: item.actions.map(action => ({
-              ...action,
-              // @ts-expect-error fix this
-              error: error.actionErrors[usedErrorIdx++] ?? null,
-            })),
-          })),
-        );
-      }
-    } else {
-      // If adding a rule, we got back an id
-      if (newId) {
-        // @ts-expect-error fix this
-        rule.id = newId;
-      }
-
-      // @ts-expect-error fix this
-      originalOnSave?.(rule);
-    }
+          if ('actionErrors' in error && error.actionErrors) {
+            let usedErrorIdx = 0;
+            setActionSplits(
+              actionSplits.map(item => ({
+                ...item,
+                actions: item.actions.map(action => ({
+                  ...action,
+                  error: error.actionErrors[usedErrorIdx++] ?? null,
+                })),
+              })),
+            );
+          }
+        },
+      },
+    );
   }
 
   // Enable editing existing split rules even if the feature has since been disabled.

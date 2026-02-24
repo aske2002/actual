@@ -13,6 +13,7 @@ import { getApproxNumberThreshold, sortNumbers } from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
 import { fastSetMerge, partitionByField } from '../../shared/util';
 import type {
+  PayeeEntity,
   RuleActionEntity,
   RuleEntity,
   TransactionEntity,
@@ -784,7 +785,10 @@ function* getOneOfSetterRules(
   return null;
 }
 
-export async function updatePayeeRenameRule(fromNames: string[], to: string) {
+export async function updatePayeeRenameRule(
+  fromNames: Array<PayeeEntity['name']>,
+  to: PayeeEntity['id'],
+) {
   const renameRule = getOneOfSetterRules('pre', 'imported_payee', 'payee', {
     actionValue: to,
   }).next().value;
