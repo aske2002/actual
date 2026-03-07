@@ -1,5 +1,3 @@
-import https from 'https';
-
 import express from 'express';
 
 import { handleError } from '../app-gocardless/util/handle-error';
@@ -8,6 +6,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '../util/middlewares';
+import { pinnedFetch, validateUrl } from '../util/validate-url';
 
 const app = express();
 export { app as handlers };
@@ -305,6 +304,34 @@ function parseAccessKey(accessKey) {
   [auth, rest] = rest.split('@');
   [username, password] = auth.split(':');
   baseUrl = `${scheme}//${rest}`;
+
+  // Validate that the parsed base URL points to an expected SimpleFIN endpoint
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(baseUrl);
+  } catch (e) {
+    console.log('Invalid SimpleFIN base URL in access key');
+    throw new Error('Invalid access key');
+  }
+
+  // Enforce HTTPS and restrict the hostname to the SimpleFIN domain
+  if (parsedUrl.protocol !== 'https:') {
+    console.log('Invalid SimpleFIN access key protocol:', parsedUrl.protocol);
+    throw new Error('Invalid access key');
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const isAllowedHost =
+    hostname === 'simplefin.com' ||
+    hostname.endsWith('.simplefin.com') ||
+    hostname === 'simplefin.org' ||
+    hostname.endsWith('.simplefin.org');
+
+  if (!isAllowedHost) {
+    console.log('Invalid SimpleFIN access key host:', hostname);
+    throw new Error('Invalid access key');
+  }
+
   return {
     baseUrl,
     username,
@@ -314,22 +341,22 @@ function parseAccessKey(accessKey) {
 
 async function getAccessKey(base64Token) {
   const token = Buffer.from(base64Token, 'base64').toString();
-  const options = {
+  const tokenUrl = new URL(token);
+  if (tokenUrl.protocol !== 'https:') {
+    throw new Error('Setup token must use HTTPS');
+  }
+  const { resolvedAddress, family } = await validateUrl(token);
+
+  const response = await pinnedFetch(token, resolvedAddress, family, {
     method: 'POST',
-    port: 443,
-    headers: { 'Content-Length': 0 },
-  };
-  return new Promise((resolve, reject) => {
-    const req = https.request(new URL(token), options, res => {
-      res.on('data', d => {
-        resolve(d.toString());
-      });
-    });
-    req.on('error', e => {
-      reject(e);
-    });
-    req.end();
+    headers: { 'Content-Length': '0' },
   });
+
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`getAccessKey failed with status ${response.status}`);
+  }
+
+  return response.text();
 }
 
 async function getTransactions(accessKey, accounts, startDate, endDate) {
@@ -385,11 +412,47 @@ async function getAccounts(
   const url = new URL(`${sfin.baseUrl}/accounts`);
   url.search = params.toString();
 
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers,
-    redirect: 'follow',
-  });
+  const MAX_REDIRECTS = 5;
+  let currentUrl = url.toString();
+  const originalOrigin = url.origin;
+  let currentHeaders = { ...headers };
+  let response;
+
+  for (let i = 0; i <= MAX_REDIRECTS; i++) {
+    const { resolvedAddress, family } = await validateUrl(currentUrl);
+
+    response = await pinnedFetch(currentUrl, resolvedAddress, family, {
+      method: 'GET',
+      headers: currentHeaders,
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) {
+        throw new Error('Redirect response missing Location header');
+      }
+      const nextUrl = new URL(location, currentUrl);
+
+      // Reject non-HTTPS redirects
+      if (nextUrl.protocol !== 'https:') {
+        throw new Error('Insecure redirect to non-HTTPS URL');
+      }
+
+      currentUrl = nextUrl.toString();
+
+      // Strip Authorization header on cross-origin redirects
+      if (nextUrl.origin !== originalOrigin) {
+        currentHeaders = { ...currentHeaders };
+        delete currentHeaders.Authorization;
+      }
+
+      if (i === MAX_REDIRECTS) {
+        throw new Error('Too many redirects');
+      }
+      continue;
+    }
+    break;
+  }
 
   if (response.status === 403) {
     throw new Error('Forbidden');

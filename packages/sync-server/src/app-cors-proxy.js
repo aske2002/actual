@@ -1,9 +1,9 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import ipaddr from 'ipaddr.js';
 
 import { config } from './load-config';
 import { requestLoggerMiddleware } from './util/middlewares';
+import { isPrivateHost, pinnedFetch, validateUrl } from './util/validate-url';
 import { validateSession } from './util/validate-user';
 
 const app = express();
@@ -61,27 +61,24 @@ async function fetchAllowlist() {
 
 /**
  * Return true only if the URL is on an allowlist and not a local/private address.
+ * When isRedirect is true, also allows known GitHub CDN hosts that serve
+ * release assets (these use opaque signed URLs without repo path structure).
  */
-function isUrlAllowed(targetUrl) {
+async function isUrlAllowed(targetUrl, isRedirect = false) {
   try {
     const url = new URL(targetUrl);
     const hostname = url.hostname;
 
-    // Block private/local IP addresses
-    if (ipaddr.isValid(hostname)) {
-      const ip = ipaddr.parse(hostname);
-      if (
-        [
-          'private',
-          'loopback',
-          'linkLocal',
-          'uniqueLocal',
-          'unspecified',
-        ].includes(ip.range())
-      ) {
-        console.warn(`Blocked request to private/localhost IP: ${hostname}`);
-        return false;
-      }
+    // Enforce HTTPS protocol
+    if (url.protocol !== 'https:') {
+      console.warn(`Blocked non-HTTPS request: ${url.protocol}//${hostname}`);
+      return false;
+    }
+
+    // Block private/local IP addresses (DNS-aware, resolves hostnames)
+    if (await isPrivateHost(hostname)) {
+      console.warn(`Blocked request to private/localhost address: ${hostname}`);
+      return false;
     }
 
     // Always allow the specific plugin-store URL
@@ -117,6 +114,11 @@ function isUrlAllowed(targetUrl) {
           e.message,
         );
       }
+    }
+
+    // Allow known GitHub CDN hosts for redirect targets (release asset downloads)
+    if (isRedirect && hostname.endsWith('.githubusercontent.com')) {
+      return true;
     }
 
     return false;
@@ -167,7 +169,7 @@ app.use('/', async (req, res) => {
   }
 
   // Check if the URL is allowed
-  if (!isUrlAllowed(url.href)) {
+  if (!(await isUrlAllowed(url.href))) {
     console.warn('Blocked request to unauthorized URL:', url.href);
     return res.status(403).json({
       error: 'URL not allowed',
@@ -193,7 +195,6 @@ app.use('/', async (req, res) => {
     const requestHeaders = {
       ...req.headers,
       ...customHeaders,
-      host: url.host,
     };
 
     // Remove headers that shouldn't be forwarded
@@ -201,6 +202,8 @@ app.use('/', async (req, res) => {
     delete requestHeaders['content-length'];
     delete requestHeaders['cookie'];
     delete requestHeaders['cookie2'];
+    delete requestHeaders['accept-encoding'];
+    delete requestHeaders['host'];
 
     // Add GitHub authentication if token is configured and request is to GitHub
     const githubToken = config.get('github.token');
@@ -217,15 +220,57 @@ app.use('/', async (req, res) => {
       );
     }
 
-    const response = await fetch(url.href, {
-      method,
-      headers: requestHeaders,
-      body: ['GET', 'HEAD'].includes(method)
-        ? undefined
-        : typeof body === 'string'
-          ? body
-          : JSON.stringify(body),
-    });
+    // Pinned fetch with per-hop redirect validation
+    const MAX_REDIRECTS = 5;
+    let currentUrl = url.href;
+    const originalOrigin = url.origin;
+    let currentHeaders = { ...requestHeaders };
+    let response;
+
+    for (let i = 0; i <= MAX_REDIRECTS; i++) {
+      const { resolvedAddress, family } = await validateUrl(currentUrl);
+
+      response = await pinnedFetch(currentUrl, resolvedAddress, family, {
+        method: methodNormalized,
+        headers: currentHeaders,
+      });
+
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get('location');
+        if (!location) {
+          break;
+        }
+        const nextUrl = new URL(location, currentUrl);
+
+        // Enforce HTTPS on redirect hops
+        if (nextUrl.protocol !== 'https:') {
+          return res
+            .status(502)
+            .json({ error: 'Redirect to non-HTTPS URL is not allowed' });
+        }
+
+        // Re-check allowlist for redirect target
+        if (!(await isUrlAllowed(nextUrl.href, true))) {
+          return res
+            .status(403)
+            .json({ error: 'Redirect target is not on the allowlist' });
+        }
+
+        currentUrl = nextUrl.toString();
+
+        // Strip auth headers on cross-origin redirects
+        if (nextUrl.origin !== originalOrigin) {
+          currentHeaders = { ...currentHeaders };
+          delete currentHeaders['Authorization'];
+        }
+
+        if (i === MAX_REDIRECTS) {
+          return res.status(502).json({ error: 'Too many redirects' });
+        }
+        continue;
+      }
+      break;
+    }
 
     const contentType =
       response.headers.get('content-type') || 'application/octet-stream';

@@ -1,9 +1,9 @@
-import ipaddr from 'ipaddr.js';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handlers as app, clearAllowlistCache } from './app-cors-proxy';
 import { config } from './load-config';
+import { isPrivateHost, pinnedFetch, validateUrl } from './util/validate-url';
 import { validateSession } from './util/validate-user';
 
 vi.mock('./load-config', () => ({
@@ -24,11 +24,14 @@ vi.mock('express-rate-limit', () => ({
   default: vi.fn(() => (req, res, next) => next()),
 }));
 
-vi.mock('ipaddr.js', () => ({
-  default: {
-    isValid: vi.fn().mockReturnValue(false),
-    parse: vi.fn(),
-  },
+vi.mock('./util/validate-url', () => ({
+  isPrivateHost: vi.fn().mockResolvedValue(false),
+  validateUrl: vi.fn().mockResolvedValue({
+    url: new URL('https://example.com'),
+    resolvedAddress: '1.2.3.4',
+    family: 4,
+  }),
+  pinnedFetch: vi.fn(),
 }));
 
 global.fetch = vi.fn();
@@ -39,15 +42,14 @@ describe('app-cors-proxy', () => {
     'https://github.com/user/repo2',
   ];
 
-  const createFetchMock = (options = {}) => {
+  const createAllowlistFetchMock = (options = {}) => {
     const {
       allowlistedRepos = defaultAllowlistedRepos,
       allowlistFetchFails = false,
       allowlistHttpError = false,
-      proxyResponses = {},
     } = options;
 
-    return vi.fn().mockImplementation((url, _requestOptions) => {
+    return vi.fn().mockImplementation(url => {
       if (
         url ===
         'https://raw.githubusercontent.com/actualbudget/plugin-store/refs/heads/main/plugins.json'
@@ -70,104 +72,108 @@ describe('app-cors-proxy', () => {
         });
       }
 
-      if (proxyResponses[url]) {
-        const response = proxyResponses[url];
-        if (response.error) {
-          return Promise.reject(response.error);
-        }
-        return Promise.resolve(response);
-      }
-
       return Promise.resolve({
         ok: true,
-        text: () => Promise.resolve('default response'),
-        headers: {
-          get: () => 'text/plain',
-        },
-        status: 200,
+        json: () => Promise.resolve([]),
       });
     });
   };
 
-  const comprehensiveProxyResponses = {
+  const proxyResponses = {
     'https://github.com/user/repo1': {
-      ok: true,
-      text: () => Promise.resolve('test content'),
-      headers: { get: () => 'text/plain' },
       status: 200,
+      text: () => Promise.resolve('test content'),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      headers: { get: () => 'text/plain' },
     },
     'https://api.github.com/repos/user/repo1/releases': {
-      ok: true,
-      text: () => Promise.resolve('{"name": "test"}'),
-      headers: { get: () => 'application/json' },
       status: 200,
+      text: () => Promise.resolve('{"name": "test"}'),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      headers: { get: () => 'application/json' },
     },
     'https://api.github.com/repos/user/repo1': {
-      ok: true,
-      text: () => Promise.resolve('{"name": "repo1"}'),
-      headers: { get: () => 'application/json' },
       status: 200,
+      text: () => Promise.resolve('{"name": "repo1"}'),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      headers: { get: () => 'application/json' },
     },
     'https://raw.githubusercontent.com/user/repo1/main/file.txt': {
-      ok: true,
-      text: () => Promise.resolve('file content'),
-      headers: { get: () => 'text/plain' },
       status: 200,
+      text: () => Promise.resolve('file content'),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      headers: { get: () => 'text/plain' },
     },
     'https://github.com/user/repo1/releases/download/v1.0.0/file.zip': {
-      ok: true,
+      status: 200,
+      text: () => Promise.resolve(''),
       arrayBuffer: () =>
         Promise.resolve(new TextEncoder().encode('release content').buffer),
       headers: { get: () => 'application/octet-stream' },
-      status: 200,
     },
     'https://github.com/user/repo1/manifest.json': {
-      ok: true,
+      status: 200,
       text: () =>
         Promise.resolve(JSON.stringify({ name: 'test', version: '1.0.0' })),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
       headers: { get: () => 'application/json' },
-      status: 200,
     },
     'https://github.com/user/repo1/package.json': {
-      ok: true,
-      text: () => Promise.resolve(JSON.stringify({ test: true })),
-      headers: { get: () => 'text/plain' },
       status: 200,
+      text: () => Promise.resolve(JSON.stringify({ test: true })),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      headers: { get: () => 'text/plain' },
     },
     'https://github.com/user/repo1/readme.txt': {
-      ok: true,
-      text: () => Promise.resolve('Hello, world!'),
-      headers: { get: () => 'text/plain' },
       status: 200,
+      text: () => Promise.resolve('Hello, world!'),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      headers: { get: () => 'text/plain' },
     },
     'https://github.com/user/repo1/file.bin': {
-      ok: true,
+      status: 200,
+      text: () => Promise.resolve(''),
       arrayBuffer: () =>
         Promise.resolve(new Uint8Array([1, 2, 3, 4, 5]).buffer),
       headers: { get: () => 'application/octet-stream' },
-      status: 200,
     },
     'https://github.com/user/repo1/invalid.json': {
-      ok: true,
-      text: () => Promise.resolve('not valid json'),
-      headers: { get: () => 'text/plain' },
       status: 200,
-    },
-    'https://github.com/user/repo1/network-error': {
-      error: new Error('Network error'),
+      text: () => Promise.resolve('not valid json'),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      headers: { get: () => 'text/plain' },
     },
   };
 
+  const defaultPinnedResponse = {
+    status: 200,
+    text: () => Promise.resolve('default response'),
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+    headers: { get: () => 'text/plain' },
+  };
+
   beforeAll(() => {
-    global.fetch = createFetchMock({
-      proxyResponses: comprehensiveProxyResponses,
-    });
+    global.fetch = createAllowlistFetchMock();
   });
 
   beforeEach(() => {
     validateSession.mockClear?.();
-    ipaddr.isValid.mockClear?.();
-    ipaddr.parse.mockClear?.();
+    isPrivateHost.mockClear?.();
+    isPrivateHost.mockResolvedValue(false);
+    validateUrl.mockClear?.();
+    validateUrl.mockResolvedValue({
+      url: new URL('https://example.com'),
+      resolvedAddress: '1.2.3.4',
+      family: 4,
+    });
+    pinnedFetch.mockClear?.();
+    pinnedFetch.mockImplementation(url => {
+      const response = proxyResponses[url];
+      if (response) {
+        return Promise.resolve(response);
+      }
+      return Promise.resolve(defaultPinnedResponse);
+    });
 
     validateSession.mockReturnValue({ userId: 'test-user' });
 
@@ -237,32 +243,38 @@ describe('app-cors-proxy', () => {
       validateSession.mockReturnValue({ userId: 'test-user' });
     });
 
-    it('should block private IP addresses', async () => {
-      ipaddr.isValid.mockReturnValueOnce(true);
-      ipaddr.parse.mockReturnValueOnce({
-        range: () => 'private',
-      });
-
+    it('should block non-HTTPS URLs', async () => {
       const res = await request(app)
         .get('/')
-        .query({ url: 'http://192.168.1.1/test' });
+        .query({ url: 'http://github.com/user/repo1' });
 
       expect(res.statusCode).toBe(403);
       expect(res.body.error).toBe('URL not allowed');
       expect(console.warn).toHaveBeenCalledWith(
-        'Blocked request to private/localhost IP: 192.168.1.1',
+        'Blocked non-HTTPS request: http://github.com',
+      );
+    });
+
+    it('should block private IP addresses', async () => {
+      isPrivateHost.mockResolvedValueOnce(true);
+
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://192.168.1.1/test' });
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('URL not allowed');
+      expect(console.warn).toHaveBeenCalledWith(
+        'Blocked request to private/localhost address: 192.168.1.1',
       );
     });
 
     it('should block loopback addresses', async () => {
-      ipaddr.isValid.mockReturnValueOnce(true);
-      ipaddr.parse.mockReturnValueOnce({
-        range: () => 'loopback',
-      });
+      isPrivateHost.mockResolvedValueOnce(true);
 
       const res = await request(app)
         .get('/')
-        .query({ url: 'http://127.0.0.1/test' });
+        .query({ url: 'https://127.0.0.1/test' });
 
       expect(res.statusCode).toBe(403);
       expect(res.body.error).toBe('URL not allowed');
@@ -330,9 +342,8 @@ describe('app-cors-proxy', () => {
     });
 
     it('should handle allowlist fetch failure gracefully', async () => {
-      global.fetch = createFetchMock({
+      global.fetch = createAllowlistFetchMock({
         allowlistFetchFails: true,
-        proxyResponses: comprehensiveProxyResponses,
       });
 
       const res = await request(app)
@@ -345,15 +356,12 @@ describe('app-cors-proxy', () => {
         expect.any(Error),
       );
 
-      global.fetch = createFetchMock({
-        proxyResponses: comprehensiveProxyResponses,
-      });
+      global.fetch = createAllowlistFetchMock();
     });
 
     it('should handle allowlist fetch HTTP error', async () => {
-      global.fetch = createFetchMock({
+      global.fetch = createAllowlistFetchMock({
         allowlistHttpError: true,
-        proxyResponses: comprehensiveProxyResponses,
       });
 
       const res = await request(app)
@@ -366,9 +374,7 @@ describe('app-cors-proxy', () => {
         expect.any(Error),
       );
 
-      global.fetch = createFetchMock({
-        proxyResponses: comprehensiveProxyResponses,
-      });
+      global.fetch = createAllowlistFetchMock();
     });
   });
 
@@ -428,8 +434,10 @@ describe('app-cors-proxy', () => {
         .get('/')
         .query({ url: 'https://api.github.com/repos/user/repo1' });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(pinnedFetch).toHaveBeenCalledWith(
         'https://api.github.com/repos/user/repo1',
+        '1.2.3.4',
+        4,
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'Bearer test-github-token',
@@ -446,8 +454,10 @@ describe('app-cors-proxy', () => {
         url: 'https://raw.githubusercontent.com/user/repo1/main/file.txt',
       });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(pinnedFetch).toHaveBeenCalledWith(
         'https://raw.githubusercontent.com/user/repo1/main/file.txt',
+        '1.2.3.4',
+        4,
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'Bearer test-github-token',
@@ -464,8 +474,10 @@ describe('app-cors-proxy', () => {
         .get('/')
         .query({ url: 'https://api.github.com/repos/user/repo1' });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(pinnedFetch).toHaveBeenCalledWith(
         'https://api.github.com/repos/user/repo1',
+        '1.2.3.4',
+        4,
         expect.objectContaining({
           headers: expect.not.objectContaining({
             Authorization: expect.any(String),
@@ -546,6 +558,8 @@ describe('app-cors-proxy', () => {
     });
 
     it('should handle fetch errors', async () => {
+      pinnedFetch.mockRejectedValueOnce(new Error('Network error'));
+
       const res = await request(app)
         .get('/')
         .query({ url: 'https://github.com/user/repo1/network-error' });
