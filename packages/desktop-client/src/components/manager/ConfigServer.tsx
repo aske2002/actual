@@ -17,17 +17,14 @@ import {
 
 import { Title } from './subscribe/common';
 
-import { createBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  useServerURL,
-  useSetServerURL,
-} from '@desktop-client/components/ServerContext';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { loggedIn, signOut } from '@desktop-client/users/usersSlice';
+import { createBudget } from '#budgetfiles/budgetfilesSlice';
+import { Link } from '#components/common/Link';
+import { useServerURL, useSetServerURL } from '#components/ServerContext';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { saveGlobalPrefs } from '#prefs/prefsSlice';
+import { useDispatch } from '#redux';
+import { loggedIn, signOut } from '#users/usersSlice';
 
 export function ElectronServerConfig({
   onDoNotUseServer,

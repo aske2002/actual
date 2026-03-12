@@ -8,7 +8,7 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
 type SyncProviders = 'goCardless' | 'simpleFin' | 'pluggyai' | 'unlinked';
 

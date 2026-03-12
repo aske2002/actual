@@ -6,7 +6,7 @@ import type { PayeeEntity } from 'loot-core/types/models';
 
 import { ManagePayeesWithData } from './ManagePayeesWithData';
 
-import { Page } from '@desktop-client/components/Page';
+import { Page } from '#components/Page';
 
 export function ManagePayeesPage() {
   const { t } = useTranslation();

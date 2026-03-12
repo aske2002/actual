@@ -7,11 +7,11 @@ import { theme } from '@actual-app/components/theme';
 
 import { Setting } from './UI';
 
-import { Link } from '@desktop-client/components/common/Link';
-import { useServerURL } from '@desktop-client/components/ServerContext';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { Link } from '#components/common/Link';
+import { useServerURL } from '#components/ServerContext';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export function EncryptionSettings() {
   const dispatch = useDispatch();

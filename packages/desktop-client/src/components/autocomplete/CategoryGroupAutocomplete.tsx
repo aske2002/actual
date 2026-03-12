@@ -19,7 +19,7 @@ import type { CategoryGroupEntity } from 'loot-core/types/models';
 
 import { Autocomplete } from './Autocomplete';
 
-import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategories } from '#hooks/useCategories';
 
 type CategoryGroupAutocompleteItem = CategoryGroupEntity;
 

@@ -12,7 +12,7 @@ import type {
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
-import { useMoveCategoryMutation } from '@desktop-client/budget';
+import { useMoveCategoryMutation } from '#budget';
 
 type ExpenseCategoryListProps = {
   categoryGroup: CategoryGroupEntity;

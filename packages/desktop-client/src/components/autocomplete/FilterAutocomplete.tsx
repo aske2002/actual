@@ -6,7 +6,7 @@ import type { TransactionFilterEntity } from 'loot-core/types/models';
 import { Autocomplete } from './Autocomplete';
 import { FilterList } from './FilterList';
 
-import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
+import { useTransactionFilters } from '#hooks/useTransactionFilters';
 
 export function FilterAutocomplete({
   embedded,

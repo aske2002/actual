@@ -6,8 +6,8 @@ import { theme } from '@actual-app/components/theme';
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
-import type { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
+import type { CellValue } from '#components/spreadsheet/CellValue';
+import { useSheetValue } from '#hooks/useSheetValue';
 
 type IncomeProgressProps = {
   current: ComponentProps<typeof CellValue>['binding'];

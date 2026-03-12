@@ -8,9 +8,9 @@ import { send } from 'loot-core/platform/client/connection';
 
 import { Setting } from './UI';
 
-import { resetSync } from '@desktop-client/app/appSlice';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useDispatch } from '@desktop-client/redux';
+import { resetSync } from '#app/appSlice';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useDispatch } from '#redux';
 
 export function ResetCache() {
   const [resetting, setResetting] = useState(false);

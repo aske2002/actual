@@ -13,16 +13,12 @@ import { q } from 'loot-core/shared/query';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { Search } from '@desktop-client/components/common/Search';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { Search } from '#components/common/Search';
+import { useSchedules } from '#hooks/useSchedules';
+import { pushModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type ScheduleLinkProps = Extract<
   ModalType,

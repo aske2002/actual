@@ -6,8 +6,8 @@ import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 
 import { excelFormulaExtension } from './codeMirror-excelLanguage';
 
-import { autocompleteTabAcceptHighest } from '@desktop-client/components/codemirror/autocompleteTabAccept';
-import { useTheme } from '@desktop-client/style/theme';
+import { autocompleteTabAcceptHighest } from '#components/codemirror/autocompleteTabAccept';
+import { useTheme } from '#style/theme';
 
 type FormulaMode = 'transaction' | 'query';
 

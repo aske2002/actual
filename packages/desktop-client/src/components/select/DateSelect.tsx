@@ -40,10 +40,10 @@ import 'pikaday/css/pikaday.css';
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
-import { InputField } from '@desktop-client/components/mobile/MobileForms';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { InputField } from '#components/mobile/MobileForms';
+import { useLocale } from '#hooks/useLocale';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 const pickerStyles: CSSProperties = {
   '& .pika-single.actual-date-picker': {

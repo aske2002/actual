@@ -20,7 +20,7 @@ import type { AccountEntity } from 'loot-core/types/models';
 import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useAccounts } from '#hooks/useAccounts';
 
 type AccountAutocompleteItem = AccountEntity;
 

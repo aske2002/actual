@@ -15,10 +15,10 @@ import {
 import {
   categoryLists,
   ReportOptions,
-} from '@desktop-client/components/reports/ReportOptions';
-import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+} from '#components/reports/ReportOptions';
+import type { QueryDataEntity } from '#components/reports/ReportOptions';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
 export function createGroupedSpreadsheet({
   startDate,

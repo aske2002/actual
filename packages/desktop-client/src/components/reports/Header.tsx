@@ -20,9 +20,9 @@ import {
   validateStart,
 } from './reportRanges';
 
-import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { AppliedFilters } from '#components/filters/AppliedFilters';
+import { FilterButton } from '#components/filters/FiltersMenu';
+import { useLocale } from '#hooks/useLocale';
 
 type HeaderProps = {
   start: TimeFrame['start'];

@@ -5,6 +5,14 @@
   "files": [
     "build"
   ],
+  "imports": {
+    "#*": [
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
+  },
   "scripts": {
     "start": "cross-env PORT=3001 vite",
     "start:browser": "cross-env ./bin/watch-browser",

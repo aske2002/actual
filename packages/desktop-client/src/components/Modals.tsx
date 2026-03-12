@@ -78,11 +78,11 @@ import { ScheduleEditModal } from './schedules/ScheduleEditModal';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useModalState } from '@desktop-client/hooks/useModalState';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { closeModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useModalState } from '#hooks/useModalState';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { closeModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export function Modals() {
   const location = useLocation();

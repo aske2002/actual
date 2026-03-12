@@ -7,8 +7,8 @@ import { View } from '@actual-app/components/view';
 
 import { UserDirectory } from './UserDirectory';
 
-import { Page } from '@desktop-client/components/Page';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { Page } from '#components/Page';
+import { useNavigate } from '#hooks/useNavigate';
 
 export function UserDirectoryPage({
   bottomContent,

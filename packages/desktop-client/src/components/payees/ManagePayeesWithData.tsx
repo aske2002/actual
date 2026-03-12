@@ -11,12 +11,12 @@ import type { NewRuleEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { ManagePayees } from './ManagePayees';
 
-import { useOrphanedPayees } from '@desktop-client/hooks/useOrphanedPayees';
-import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { payeeQueries } from '@desktop-client/payees';
-import { useDispatch } from '@desktop-client/redux';
+import { useOrphanedPayees } from '#hooks/useOrphanedPayees';
+import { usePayeeRuleCounts } from '#hooks/usePayeeRuleCounts';
+import { usePayees } from '#hooks/usePayees';
+import { pushModal } from '#modals/modalsSlice';
+import { payeeQueries } from '#payees';
+import { useDispatch } from '#redux';
 
 type ManagePayeesWithDataProps = {
   initialSelectedIds: string[];

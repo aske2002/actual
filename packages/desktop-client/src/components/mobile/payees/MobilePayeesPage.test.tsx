@@ -7,14 +7,14 @@ import type { PayeeEntity } from 'loot-core/types/models';
 
 import { MobilePayeesPage } from './MobilePayeesPage';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
-import { payeeQueries } from '@desktop-client/payees';
+import { useNavigate } from '#hooks/useNavigate';
+import { createTestQueryClient, TestProviders } from '#mocks';
+import { payeeQueries } from '#payees';
 
 vi.mock('@use-gesture/react', () => ({
   useDrag: vi.fn().mockReturnValue(() => ({})),
 }));
-vi.mock('@desktop-client/hooks/useNavigate');
+vi.mock('#hooks/useNavigate');
 
 const mockPayees: PayeeEntity[] = [
   {

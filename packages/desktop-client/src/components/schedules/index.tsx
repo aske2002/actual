@@ -12,11 +12,11 @@ import type { ScheduleEntity } from 'loot-core/types/models';
 import { SchedulesTable } from './SchedulesTable';
 import type { ScheduleItemAction } from './SchedulesTable';
 
-import { Search } from '@desktop-client/components/common/Search';
-import { Page } from '@desktop-client/components/Page';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { Search } from '#components/common/Search';
+import { Page } from '#components/Page';
+import { useSchedules } from '#hooks/useSchedules';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export function Schedules() {
   const { t } = useTranslation();

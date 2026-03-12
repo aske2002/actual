@@ -13,20 +13,17 @@ import { View } from '@actual-app/components/view';
 
 import { ColorPalette } from './ColorPalette';
 
-import { Link } from '@desktop-client/components/common/Link';
-import { FixedSizeList } from '@desktop-client/components/FixedSizeList';
-import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
+import { Link } from '#components/common/Link';
+import { FixedSizeList } from '#components/FixedSizeList';
+import { useThemeCatalog } from '#hooks/useThemeCatalog';
 import {
   extractRepoOwner,
   fetchThemeCss,
   generateThemeId,
   normalizeGitHubRepo,
   validateThemeCss,
-} from '@desktop-client/style/customThemes';
-import type {
-  CatalogTheme,
-  InstalledTheme,
-} from '@desktop-client/style/customThemes';
+} from '#style/customThemes';
+import type { CatalogTheme, InstalledTheme } from '#style/customThemes';
 
 // Theme item fixed dimensions
 const THEME_ITEM_HEIGHT = 140;

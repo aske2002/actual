@@ -3,13 +3,13 @@ import { vi } from 'vitest';
 
 import { GoCardlessExternalMsgModal } from './GoCardlessExternalMsgModal';
 
-import { TestProviders } from '@desktop-client/mocks';
+import { TestProviders } from '#mocks';
 
-vi.mock('@desktop-client/hooks/useGlobalPref', () => ({
+vi.mock('#hooks/useGlobalPref', () => ({
   useGlobalPref: () => [null],
 }));
 
-vi.mock('@desktop-client/hooks/useGoCardlessStatus', () => ({
+vi.mock('#hooks/useGoCardlessStatus', () => ({
   useGoCardlessStatus: () => ({
     configuredGoCardless: true,
     isLoading: false,

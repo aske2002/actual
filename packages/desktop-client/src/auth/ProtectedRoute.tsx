@@ -9,8 +9,8 @@ import type { RemoteFile, SyncedLocalFile } from 'loot-core/types/file';
 import { useAuth } from './AuthProvider';
 import type { Permissions } from './types';
 
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useSelector } from '@desktop-client/redux';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useSelector } from '#redux';
 
 type ProtectedRouteProps = {
   permission: Permissions;

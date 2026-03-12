@@ -9,7 +9,7 @@ import { View } from '@actual-app/components/view';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
 
-import { useSelector } from '@desktop-client/redux';
+import { useSelector } from '#redux';
 
 export function BankSyncStatus() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);

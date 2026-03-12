@@ -15,10 +15,10 @@ import { amountToInteger } from 'loot-core/shared/util';
 
 import { LoadingIndicator } from './LoadingIndicator';
 
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 const FONT_SIZE_SCALE_FACTOR = 1.6;
 const CONTAINER_MARGIN = 8;

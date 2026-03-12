@@ -15,18 +15,14 @@ import { SidebarCategory } from './SidebarCategory';
 
 import { useBudgetComponents } from '.';
 
-import {
-  DropHighlight,
-  useDraggable,
-  useDroppable,
-} from '@desktop-client/components/sort';
+import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type {
   DragState,
   OnDragChangeCallback,
   OnDropCallback,
-} from '@desktop-client/components/sort';
-import { Row } from '@desktop-client/components/table';
-import { useDragRef } from '@desktop-client/hooks/useDragRef';
+} from '#components/sort';
+import { Row } from '#components/table';
+import { useDragRef } from '#hooks/useDragRef';
 
 type ExpenseCategoryProps = {
   cat: CategoryEntity;

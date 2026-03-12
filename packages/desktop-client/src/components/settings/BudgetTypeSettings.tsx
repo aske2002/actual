@@ -8,8 +8,8 @@ import { send } from 'loot-core/platform/client/connection';
 
 import { Setting } from './UI';
 
-import { Link } from '@desktop-client/components/common/Link';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { Link } from '#components/common/Link';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 export function BudgetTypeSettings() {
   const [budgetType = 'envelope', setBudgetType] = useSyncedPref('budgetType');

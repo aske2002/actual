@@ -9,7 +9,7 @@ import { SubLabel } from './SubLabel';
 import { stripCsvImportTransaction } from './utils';
 import type { FieldMapping, ImportTransaction } from './utils';
 
-import { SectionLabel } from '@desktop-client/components/forms';
+import { SectionLabel } from '#components/forms';
 
 type FieldMappingsProps = {
   transactions: ImportTransaction[];

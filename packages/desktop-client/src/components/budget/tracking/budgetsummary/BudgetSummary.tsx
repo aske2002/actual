@@ -22,11 +22,11 @@ import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
 
-import { useTrackingBudget } from '@desktop-client/components/budget/tracking/TrackingBudgetContext';
-import { NotesButton } from '@desktop-client/components/NotesButton';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useUndo } from '@desktop-client/hooks/useUndo';
+import { useTrackingBudget } from '#components/budget/tracking/TrackingBudgetContext';
+import { NotesButton } from '#components/NotesButton';
+import { useLocale } from '#hooks/useLocale';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useUndo } from '#hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

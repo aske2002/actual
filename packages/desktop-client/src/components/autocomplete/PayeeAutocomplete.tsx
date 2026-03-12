@@ -39,15 +39,15 @@ import {
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCommonPayees } from '@desktop-client/hooks/useCommonPayees';
-import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
-import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCommonPayees } from '#hooks/useCommonPayees';
+import { useNearbyPayees } from '#hooks/useNearbyPayees';
+import { usePayees } from '#hooks/usePayees';
 import {
   getActivePayees,
   useCreatePayeeMutation,
   useDeletePayeeLocationMutation,
-} from '@desktop-client/payees';
+} from '#payees';
 
 type PayeeAutocompleteItem = PayeeEntity &
   PayeeItemType & {

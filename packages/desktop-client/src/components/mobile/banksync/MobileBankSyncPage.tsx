@@ -10,12 +10,12 @@ import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
 
 import { BankSyncAccountsList } from './BankSyncAccountsList';
 
-import { Search } from '@desktop-client/components/common/Search';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { Search } from '#components/common/Search';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useAccounts } from '#hooks/useAccounts';
+import { useNavigate } from '#hooks/useNavigate';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

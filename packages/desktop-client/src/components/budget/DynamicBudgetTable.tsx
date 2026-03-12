@@ -12,7 +12,7 @@ import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
 
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;

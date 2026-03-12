@@ -9,7 +9,7 @@ import { css } from '@emotion/css';
 
 import { Background } from './Background';
 
-import { useSelector } from '@desktop-client/redux';
+import { useSelector } from '#redux';
 
 type AppBackgroundProps = {
   isLoading?: boolean;

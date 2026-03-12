@@ -23,21 +23,21 @@ import {
   normalizeQueryTimeFrameStart,
 } from './queryTimeFrame';
 
-import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
-import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
+import { AppliedFilters } from '#components/filters/AppliedFilters';
+import { FilterButton } from '#components/filters/FiltersMenu';
+import { getLiveRange } from '#components/reports/getLiveRange';
 import {
   calculateTimeRange,
   getLatestRange,
   validateEnd,
   validateStart,
-} from '@desktop-client/components/reports/reportRanges';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
+} from '#components/reports/reportRanges';
+import { fromDateRepr } from '#components/reports/util';
+import { useLocale } from '#hooks/useLocale';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];

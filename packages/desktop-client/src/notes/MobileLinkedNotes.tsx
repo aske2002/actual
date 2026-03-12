@@ -9,8 +9,8 @@ import { isElectron } from 'loot-core/shared/environment';
 
 import { normalizeUrl } from './linkParser';
 
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 type MobileLinkedNotesProps = {
   displayText: string;

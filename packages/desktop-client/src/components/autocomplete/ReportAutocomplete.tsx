@@ -6,7 +6,7 @@ import type { CustomReportEntity } from 'loot-core/types/models';
 import { Autocomplete } from './Autocomplete';
 import { ReportList } from './ReportList';
 
-import { useReports } from '@desktop-client/hooks/useReports';
+import { useReports } from '#hooks/useReports';
 
 type ReportAutocompleteProps = {
   embedded?: boolean;

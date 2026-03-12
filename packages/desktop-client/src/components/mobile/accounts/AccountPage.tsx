@@ -17,22 +17,19 @@ import { AllAccountTransactions } from './AllAccountTransactions';
 import { OffBudgetAccountTransactions } from './OffBudgetAccountTransactions';
 import { OnBudgetAccountTransactions } from './OnBudgetAccountTransactions';
 
-import {
-  useReopenAccountMutation,
-  useUpdateAccountMutation,
-} from '@desktop-client/accounts';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useAccount } from '@desktop-client/hooks/useAccount';
-import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useAccount } from '#hooks/useAccount';
+import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import {
   collapseModals,
   openAccountCloseModal,
   pushModal,
-} from '@desktop-client/modals/modalsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+} from '#modals/modalsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 export function AccountPage() {
   const { t } = useTranslation();

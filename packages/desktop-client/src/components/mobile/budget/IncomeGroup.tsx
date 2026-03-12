@@ -20,14 +20,11 @@ import type { CategoryGroupEntity } from 'loot-core/types/models';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { IncomeCategoryList } from './IncomeCategoryList';
 
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import { useFormat } from '#hooks/useFormat';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 type IncomeGroupProps = {
   categoryGroup: CategoryGroupEntity;

@@ -23,11 +23,11 @@ import {
   separateGroups,
 } from './util';
 
-import type { DropPosition } from '@desktop-client/components/sort';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import type { DropPosition } from '#components/sort';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { useCategories } from '#hooks/useCategories';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
 
 type BudgetTableProps = {
   type: string;

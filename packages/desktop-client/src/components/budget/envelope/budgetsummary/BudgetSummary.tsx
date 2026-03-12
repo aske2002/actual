@@ -19,11 +19,11 @@ import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
 
-import { useEnvelopeBudget } from '@desktop-client/components/budget/envelope/EnvelopeBudgetContext';
-import { NotesButton } from '@desktop-client/components/NotesButton';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useUndo } from '@desktop-client/hooks/useUndo';
+import { useEnvelopeBudget } from '#components/budget/envelope/EnvelopeBudgetContext';
+import { NotesButton } from '#components/NotesButton';
+import { useLocale } from '#hooks/useLocale';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useUndo } from '#hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

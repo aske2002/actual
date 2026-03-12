@@ -11,8 +11,8 @@ import { currencies, getCurrency } from 'loot-core/shared/currencies';
 
 import { Column, Setting } from './UI';
 
-import { Checkbox } from '@desktop-client/components/forms';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { Checkbox } from '#components/forms';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 export function CurrencySettings() {
   const { t } = useTranslation();

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ManageTags } from './ManageTags';
 
-import { Page } from '@desktop-client/components/Page';
+import { Page } from '#components/Page';
 
 export const ManageTagsPage = () => {
   const { t } = useTranslation();

@@ -24,11 +24,7 @@ import { RefillAutomation } from './editor/RefillAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
 import { WeekAutomation } from './editor/WeekAutomation';
 
-import {
-  FormField,
-  FormLabel,
-  FormTextLabel,
-} from '@desktop-client/components/forms';
+import { FormField, FormLabel, FormTextLabel } from '#components/forms';
 
 type BudgetAutomationEditorProps = {
   inline: boolean;

@@ -9,7 +9,7 @@ import type { CategoryEntity } from 'loot-core/types/models';
 
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 
-import { useMoveCategoryMutation } from '@desktop-client/budget';
+import { useMoveCategoryMutation } from '#budget';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];

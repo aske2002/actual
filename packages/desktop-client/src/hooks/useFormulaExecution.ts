@@ -11,7 +11,7 @@ import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
 
 import { useLocale } from './useLocale';
 
-import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
+import { getLiveRange } from '#components/reports/getLiveRange';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];

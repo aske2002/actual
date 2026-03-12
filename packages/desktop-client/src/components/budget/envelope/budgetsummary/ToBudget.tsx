@@ -7,13 +7,13 @@ import { View } from '@actual-app/components/view';
 import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
 
-import { CoverMenu } from '@desktop-client/components/budget/envelope/CoverMenu';
-import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
-import { HoldMenu } from '@desktop-client/components/budget/envelope/HoldMenu';
-import { TransferMenu } from '@desktop-client/components/budget/envelope/TransferMenu';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+import { CoverMenu } from '#components/budget/envelope/CoverMenu';
+import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { HoldMenu } from '#components/budget/envelope/HoldMenu';
+import { TransferMenu } from '#components/budget/envelope/TransferMenu';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useFormat } from '#hooks/useFormat';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
 type ToBudgetProps = {
   month: string;

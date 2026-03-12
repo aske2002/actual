@@ -18,13 +18,10 @@ import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
 
-import { DropHighlightPosContext } from '@desktop-client/components/sort';
-import type {
-  DragState,
-  OnDropCallback,
-} from '@desktop-client/components/sort';
-import { Row } from '@desktop-client/components/table';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { DropHighlightPosContext } from '#components/sort';
+import type { DragState, OnDropCallback } from '#components/sort';
+import { Row } from '#components/table';
+import { useLocalPref } from '#hooks/useLocalPref';
 
 type BudgetItem =
   | { type: 'new-group' }

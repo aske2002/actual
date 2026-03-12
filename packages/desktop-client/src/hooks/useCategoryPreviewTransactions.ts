@@ -8,7 +8,7 @@ import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTempl
 import { usePreviewTransactions } from './usePreviewTransactions';
 import { useSheetValue } from './useSheetValue';
 
-import { categoryBalance } from '@desktop-client/spreadsheet/bindings';
+import { categoryBalance } from '#spreadsheet/bindings';
 
 type UseCategoryPreviewTransactionsProps = {
   categoryId: CategoryEntity['id'];

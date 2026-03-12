@@ -6,7 +6,7 @@ import type { TagEntity } from 'loot-core/types/models';
 
 import { TagRow } from './TagRow';
 
-import { Table, useTableNavigator } from '@desktop-client/components/table';
+import { Table, useTableNavigator } from '#components/table';
 
 type TagsListProps = {
   tags: TagEntity[];

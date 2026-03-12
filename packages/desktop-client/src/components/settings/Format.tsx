@@ -14,11 +14,11 @@ import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Column, Setting } from './UI';
 
-import { Checkbox } from '@desktop-client/components/forms';
-import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useDaysOfWeek } from '@desktop-client/hooks/useDaysOfWeek';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { Checkbox } from '#components/forms';
+import { useSidebar } from '#components/sidebar/SidebarProvider';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useDaysOfWeek } from '#hooks/useDaysOfWeek';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },

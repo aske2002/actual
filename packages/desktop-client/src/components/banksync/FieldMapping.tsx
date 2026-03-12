@@ -14,7 +14,7 @@ import type {
   TransactionDirection,
 } from './EditSyncAccount';
 
-import { Cell, Row, TableHeader } from '@desktop-client/components/table';
+import { Cell, Row, TableHeader } from '#components/table';
 
 const useTransactionDirectionOptions = () => {
   const { t } = useTranslation();

@@ -9,10 +9,7 @@ import { useCategories } from './useCategories';
 import { useSpreadsheet } from './useSpreadsheet';
 import { useSyncedPref } from './useSyncedPref';
 
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 type UseOverspentCategoriesProps = {
   month: string;

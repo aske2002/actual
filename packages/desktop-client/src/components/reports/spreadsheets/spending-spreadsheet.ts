@@ -12,8 +12,8 @@ import type {
 
 import { makeQuery } from './makeQuery';
 
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
 type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];

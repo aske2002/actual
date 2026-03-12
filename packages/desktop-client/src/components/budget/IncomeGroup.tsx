@@ -10,7 +10,7 @@ import { SidebarGroup } from './SidebarGroup';
 
 import { useBudgetComponents } from '.';
 
-import { Row } from '@desktop-client/components/table';
+import { Row } from '#components/table';
 
 type IncomeGroupProps = {
   group: CategoryGroupEntity;

@@ -4,7 +4,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 import { useFeatureFlag } from './useFeatureFlag';
 
-import { locationService } from '@desktop-client/payees/location';
+import { locationService } from '#payees/location';
 
 /**
  * Custom hook to manage geolocation permission status

@@ -16,16 +16,10 @@ import { TagCreationRow } from './TagCreationRow';
 import { TagsHeader } from './TagsHeader';
 import { TagsList } from './TagsList';
 
-import { Search } from '@desktop-client/components/common/Search';
-import {
-  SelectedProvider,
-  useSelected,
-} from '@desktop-client/hooks/useSelected';
-import { useTags } from '@desktop-client/hooks/useTags';
-import {
-  useDeleteTagsMutation,
-  useDiscoverTagsMutation,
-} from '@desktop-client/tags';
+import { Search } from '#components/common/Search';
+import { SelectedProvider, useSelected } from '#hooks/useSelected';
+import { useTags } from '#hooks/useTags';
+import { useDeleteTagsMutation, useDiscoverTagsMutation } from '#tags';
 
 export function ManageTags() {
   const { t } = useTranslation();

@@ -33,8 +33,8 @@ import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
 
-import { Information } from '@desktop-client/components/alerts';
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { Information } from '#components/alerts';
+import { useLocale } from '#hooks/useLocale';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;

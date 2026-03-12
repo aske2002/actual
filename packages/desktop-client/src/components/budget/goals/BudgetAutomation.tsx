@@ -15,7 +15,7 @@ import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
 import type { DisplayTemplateType } from './constants';
 import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
 
-import { useEffectAfterMount } from '@desktop-client/hooks/useEffectAfterMount';
+import { useEffectAfterMount } from '#hooks/useEffectAfterMount';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];

@@ -19,7 +19,7 @@ import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
 
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
 type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;

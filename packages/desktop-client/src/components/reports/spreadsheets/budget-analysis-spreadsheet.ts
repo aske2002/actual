@@ -6,7 +6,7 @@ import type {
   RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 type BudgetAnalysisIntervalData = {
   date: string;

@@ -9,13 +9,10 @@ import { View } from '@actual-app/components/view';
 
 import { Setting } from './UI';
 
-import {
-  useLoginMethod,
-  useMultiuserEnabled,
-} from '@desktop-client/components/ServerContext';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export function AuthSettings() {
   const { t } = useTranslation();

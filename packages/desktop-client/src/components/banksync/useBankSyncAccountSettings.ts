@@ -14,8 +14,8 @@ import type {
   TransactionDirection,
 } from './EditSyncAccount';
 
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTransactions } from '#hooks/useTransactions';
 
 export function useBankSyncAccountSettings(accountId: string) {
   const [savedMappings = mappingsToString(defaultMappings), setSavedMappings] =

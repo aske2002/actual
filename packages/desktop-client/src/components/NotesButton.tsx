@@ -14,7 +14,7 @@ import { send } from 'loot-core/platform/client/connection';
 
 import { Notes } from './Notes';
 
-import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useNotes } from '#hooks/useNotes';
 
 type NotesButtonProps = {
   id: string;

@@ -15,7 +15,7 @@ import type { RuleConditionEntity } from 'loot-core/types/models';
 import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
 
-import { Value } from '@desktop-client/components/rules/Value';
+import { Value } from '#components/rules/Value';
 
 let isDatepickerClick = false;
 

@@ -12,7 +12,7 @@ import type {
 
 import { locationService } from './location';
 
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
+import { getAccountsById } from '#accounts/accountsSlice';
 
 export const payeeQueries = {
   all: () => ['payees'],

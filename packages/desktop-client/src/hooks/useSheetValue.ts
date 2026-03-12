@@ -9,7 +9,7 @@ import type {
   SheetFields,
   SheetNames,
   Spreadsheets,
-} from '@desktop-client/spreadsheet';
+} from '#spreadsheet';
 
 type SheetValueResult<
   SheetName extends SheetNames,

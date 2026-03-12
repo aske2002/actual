@@ -8,8 +8,8 @@ import { View } from '@actual-app/components/view';
 import { LoadingIndicator } from './LoadingIndicator';
 import { Overview } from './Overview';
 
-import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDashboardPages } from '#hooks/useDashboardPages';
+import { useNavigate } from '#hooks/useNavigate';
 
 export function ReportsDashboardRouter() {
   const { t } = useTranslation();

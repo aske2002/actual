@@ -10,18 +10,18 @@ import { View } from '@actual-app/components/view';
 import * as Platform from 'loot-core/shared/platform';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
-import { BudgetMenu } from '@desktop-client/components/budget/tracking/BudgetMenu';
-import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
+import { BudgetMenu } from '#components/budget/tracking/BudgetMenu';
+import { useTrackingSheetValue } from '#components/budget/tracking/TrackingBudgetComponents';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
+} from '#components/common/Modal';
+import { FocusableAmountInput } from '#components/mobile/transactions/FocusableAmountInput';
+import { useCategory } from '#hooks/useCategory';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { trackingBudget } from '#spreadsheet/bindings';
 
 type TrackingBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-budget-menu' }>['options'],

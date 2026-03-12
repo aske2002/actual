@@ -6,7 +6,7 @@ import { Menu } from '@actual-app/components/menu';
 
 import { useTrackingSheetValue } from './TrackingBudgetComponents';
 
-import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
+import { trackingBudget } from '#spreadsheet/bindings';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

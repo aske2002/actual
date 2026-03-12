@@ -24,23 +24,19 @@ import { Command } from 'cmdk';
 
 import { CellValue, CellValueText } from './spreadsheet/CellValue';
 
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useModalState } from '@desktop-client/hooks/useModalState';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useReports } from '@desktop-client/hooks/useReports';
-import type {
-  Binding,
-  SheetFields,
-  SheetNames,
-} from '@desktop-client/spreadsheet';
+import { useAccounts } from '#hooks/useAccounts';
+import { useDashboardPages } from '#hooks/useDashboardPages';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useModalState } from '#hooks/useModalState';
+import { useNavigate } from '#hooks/useNavigate';
+import { useReports } from '#hooks/useReports';
+import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 import {
   accountBalance,
   allAccountBalance,
   offBudgetAccountBalance,
   onBudgetAccountBalance,
-} from '@desktop-client/spreadsheet/bindings';
+} from '#spreadsheet/bindings';
 
 type SearchableItem = {
   id: string;

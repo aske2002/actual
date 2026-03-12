@@ -14,20 +14,20 @@ import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 import { ThemeInstaller } from './ThemeInstaller';
 import { Column, Setting } from './UI';
 
-import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useSidebar } from '#components/sidebar/SidebarProvider';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 import {
   darkThemeOptions,
   themeOptions,
   usePreferredDarkTheme,
   useTheme,
-} from '@desktop-client/style';
+} from '#style';
 import {
   parseInstalledTheme,
   serializeInstalledTheme,
-} from '@desktop-client/style/customThemes';
-import type { InstalledTheme } from '@desktop-client/style/customThemes';
+} from '#style/customThemes';
+import type { InstalledTheme } from '#style/customThemes';
 
 const INSTALL_NEW_VALUE = '__install_new__';
 const INSTALL_CUSTOM_LIGHT = '__install_custom_light__';

@@ -10,12 +10,8 @@ import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { CustomUpcomingLength } from './CustomUpcomingLength';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 function useUpcomingLengthOptions() {
   const { t } = useTranslation();

@@ -9,7 +9,7 @@ import type { DataEntity, GroupedEntity } from 'loot-core/types/models';
 import { RenderTableRow } from './RenderTableRow';
 import type { renderRowProps } from './ReportTable';
 
-import { Row } from '@desktop-client/components/table';
+import { Row } from '#components/table';
 
 type ReportTableListProps = {
   data: DataEntity;

@@ -16,7 +16,7 @@ import { useSheetValue } from './useSheetValue';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
-import * as bindings from '@desktop-client/spreadsheet/bindings';
+import * as bindings from '#spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;

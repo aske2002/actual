@@ -14,11 +14,11 @@ import { TotalsList } from './TotalsList';
 import {
   useEnvelopeSheetName,
   useEnvelopeSheetValue,
-} from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+} from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
 type ToBudgetAmountProps = {
   prevMonthName: string;

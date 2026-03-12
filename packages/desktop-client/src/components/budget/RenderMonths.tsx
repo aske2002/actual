@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/shared/months';
 
 import { MonthsContext } from './MonthsContext';
 
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
+import { SheetNameProvider } from '#hooks/useSheetName';
 
 type RenderMonthsProps = {
   children: ReactNode | (({ month }: { month: string }) => ReactNode);

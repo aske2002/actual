@@ -15,7 +15,7 @@ import {
   ExpenseGroupListItem,
 } from './ExpenseGroupListItem';
 
-import { useMoveCategoryGroupMutation } from '@desktop-client/budget';
+import { useMoveCategoryGroupMutation } from '#budget';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];

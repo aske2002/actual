@@ -28,18 +28,18 @@ import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 
-import { accountQueries } from '@desktop-client/accounts';
-import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
-import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
-import { Permissions } from '@desktop-client/auth/types';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { accountQueries } from '#accounts';
+import { getLatestAppVersion, sync } from '#app/appSlice';
+import { ProtectedRoute } from '#auth/ProtectedRoute';
+import { Permissions } from '#auth/types';
+import { useAccounts } from '#hooks/useAccounts';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
+import { useNavigate } from '#hooks/useNavigate';
+import { ScrollProvider } from '#hooks/useScrollListener';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

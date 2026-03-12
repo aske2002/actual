@@ -4,7 +4,7 @@ import type { AccountEntity, CategoryEntity } from 'loot-core/types/models';
 import { parametrizedField } from '.';
 import type { Binding, SheetFields, SheetNames } from '.';
 
-import { uncategorizedTransactions } from '@desktop-client/queries';
+import { uncategorizedTransactions } from '#queries';
 
 type BudgetType<SheetName extends SheetNames> = Record<
   string,

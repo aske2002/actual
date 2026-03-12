@@ -16,8 +16,8 @@ import { ParsedDate } from './ParsedDate';
 import { applyFieldMappings, formatDate, parseAmountFields } from './utils';
 import type { FieldMapping, ImportTransaction } from './utils';
 
-import { Checkbox } from '@desktop-client/components/forms';
-import { Field, Row } from '@desktop-client/components/table';
+import { Checkbox } from '#components/forms';
+import { Field, Row } from '#components/table';
 
 type TransactionProps = {
   transaction: ImportTransaction;

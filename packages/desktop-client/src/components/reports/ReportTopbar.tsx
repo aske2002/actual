@@ -30,7 +30,7 @@ import type { SavedStatus } from './SaveReportMenu';
 import { setSessionReport } from './setSessionReport';
 import { SnapshotButton } from './SnapshotButton';
 
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
+import { FilterButton } from '#components/filters/FiltersMenu';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;

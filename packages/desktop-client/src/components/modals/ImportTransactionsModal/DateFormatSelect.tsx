@@ -7,7 +7,7 @@ import { View } from '@actual-app/components/view';
 import { dateFormats } from './utils';
 import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
 
-import { SectionLabel } from '@desktop-client/components/forms';
+import { SectionLabel } from '#components/forms';
 
 type DateFormatSelectProps = {
   transactions: ImportTransaction[];

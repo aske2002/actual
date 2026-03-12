@@ -15,7 +15,7 @@ import { Link } from './common/Link';
 import { Modal, ModalHeader } from './common/Modal';
 import { Checkbox } from './forms';
 
-import { useModalState } from '@desktop-client/hooks/useModalState';
+import { useModalState } from '#hooks/useModalState';
 
 type AppError = Error & {
   type?: string;

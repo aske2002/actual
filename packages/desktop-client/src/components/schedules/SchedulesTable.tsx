@@ -24,21 +24,15 @@ import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import {
-  Cell,
-  Field,
-  Row,
-  Table,
-  TableHeader,
-} from '@desktop-client/components/table';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { usePayees } from '@desktop-client/hooks/usePayees';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { Cell, Field, Row, Table, TableHeader } from '#components/table';
+import { DisplayId } from '#components/util/DisplayId';
+import { useAccounts } from '#hooks/useAccounts';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { usePayees } from '#hooks/usePayees';
 type SchedulesTableProps = {
   isLoading?: boolean;
   schedules: readonly ScheduleEntity[];

@@ -8,7 +8,7 @@ import { RenderMonths } from './RenderMonths';
 
 import { useBudgetComponents } from '.';
 
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
 type IncomeHeaderProps = {
   onShowNewGroup: () => void;

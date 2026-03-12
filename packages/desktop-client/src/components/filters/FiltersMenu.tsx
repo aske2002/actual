@@ -42,10 +42,10 @@ import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
 
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
+import { GenericInput } from '#components/util/GenericInput';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { useTransactionFilters } from '#hooks/useTransactionFilters';
 
 type FilterReducerState<T extends RuleConditionEntity> = Pick<
   T,

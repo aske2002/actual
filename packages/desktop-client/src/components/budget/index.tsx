@@ -27,14 +27,14 @@ import {
   useReorderCategoryMutation,
   useSaveCategoryGroupMutation,
   useSaveCategoryMutation,
-} from '@desktop-client/budget';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+} from '#budget';
+import { useCategories } from '#hooks/useCategories';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 export function Budget() {
   const currentMonth = monthUtils.currentMonth();

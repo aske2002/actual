@@ -18,9 +18,9 @@ import type {
 
 import { SidebarCategoryButtons } from './SidebarCategoryButtons';
 
-import { InputCell } from '@desktop-client/components/table';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { InputCell } from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;

@@ -7,7 +7,7 @@ import type { Theme } from 'loot-core/types/prefs';
 
 import { useTags } from './useTags';
 
-import { useTheme } from '@desktop-client/style';
+import { useTheme } from '#style';
 
 export function useTagCSS() {
   const { data: tags = [] } = useTags();

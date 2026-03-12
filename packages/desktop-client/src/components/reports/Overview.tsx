@@ -38,24 +38,24 @@ import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useAccounts } from '#hooks/useAccounts';
 import {
   useDashboardPages,
   useDashboardPageWidgets,
-} from '@desktop-client/hooks/useDashboardPages';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useReports } from '@desktop-client/hooks/useReports';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useUndo } from '@desktop-client/hooks/useUndo';
+} from '#hooks/useDashboardPages';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useNavigate } from '#hooks/useNavigate';
+import { useReports } from '#hooks/useReports';
+import { useResizeObserver } from '#hooks/useResizeObserver';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUndo } from '#hooks/useUndo';
 import {
   addNotification,
   removeNotification,
-} from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+} from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 import {
   useAddDashboardWidgetMutation,
   useCopyDashboardWidgetMutation,
@@ -65,7 +65,7 @@ import {
   useResetDashboardPageMutation,
   useUpdateDashboardWidgetMutation,
   useUpdateDashboardWidgetsMutation,
-} from '@desktop-client/reports/mutations';
+} from '#reports/mutations';
 
 function isCustomReportWidget(
   widget: DashboardWidgetEntity,

@@ -10,8 +10,8 @@ import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { Value } from './Value';
 
-import { usePayeesById } from '@desktop-client/hooks/usePayees';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { usePayeesById } from '#hooks/usePayees';
+import { useSchedules } from '#hooks/useSchedules';
 
 type ScheduleValueProps = {
   value: ScheduleEntity;

@@ -9,10 +9,10 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { TestProviders } from '@desktop-client/mocks';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { TestProviders } from '#mocks';
 
-vi.mock('@desktop-client/hooks/useSheetValue', () => ({
+vi.mock('#hooks/useSheetValue', () => ({
   useSheetValue: vi.fn(),
 }));
 

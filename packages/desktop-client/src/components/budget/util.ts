@@ -17,8 +17,8 @@ import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { getValidMonthBounds } from './MonthsContext';
 
-import type { DropPosition } from '@desktop-client/components/sort';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { DropPosition } from '#components/sort';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [

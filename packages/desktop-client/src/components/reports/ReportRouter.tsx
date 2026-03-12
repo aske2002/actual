@@ -12,7 +12,7 @@ import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
 
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');

@@ -7,7 +7,7 @@ import { View } from '@actual-app/components/view';
 import { MonthPicker } from './MonthPicker';
 import { getScrollbarWidth } from './util';
 
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
 type BudgetPageHeaderProps = {
   startMonth: string;

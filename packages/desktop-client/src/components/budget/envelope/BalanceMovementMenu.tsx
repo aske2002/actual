@@ -5,8 +5,8 @@ import { CoverMenu } from './CoverMenu';
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 import { TransferMenu } from './TransferMenu';
 
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+import { useFormat } from '#hooks/useFormat';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
 type BalanceMovementMenuProps = {
   categoryId: string;

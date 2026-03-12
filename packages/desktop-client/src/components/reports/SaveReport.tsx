@@ -21,15 +21,15 @@ import { SaveReportMenu } from './SaveReportMenu';
 import type { SavedStatus } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
-import { useReports } from '@desktop-client/hooks/useReports';
+import { FormField, FormLabel } from '#components/forms';
+import { useDashboardPages } from '#hooks/useDashboardPages';
+import { useReports } from '#hooks/useReports';
 import {
   useAddDashboardWidgetMutation,
   useCreateReportMutation,
   useDeleteReportMutation,
   useUpdateReportMutation,
-} from '@desktop-client/reports/mutations';
+} from '#reports/mutations';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;

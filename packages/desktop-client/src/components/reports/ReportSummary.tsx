@@ -11,10 +11,10 @@ import type { balanceTypeOpType, DataEntity } from 'loot-core/types/models';
 
 import { ReportOptions } from './ReportOptions';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
 
 type ReportSummaryProps = {
   startDate: string;
