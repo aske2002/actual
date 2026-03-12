@@ -160,6 +160,20 @@ export default defineConfig(async ({ mode }) => {
       }),
     },
     plugins: [
+      {
+        name: 'resolve-local-subpath-imports',
+        enforce: 'pre',
+        resolveId(id: string, importer: string | undefined) {
+          if (!id.startsWith('#')) return null;
+          const srcDir = path.join(__dirname, 'src');
+          if (!importer) return null;
+          const normalizedImporter = importer.replace(/[?#].*$/, '');
+          if (!normalizedImporter.startsWith(srcDir)) return null;
+          return this.resolve(path.join(srcDir, id.slice(1)), importer, {
+            skipSelf: true,
+          });
+        },
+      },
       // electron (desktop) builds do not support PWA
       mode === 'desktop'
         ? undefined
