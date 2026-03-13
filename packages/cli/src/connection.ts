@@ -1,0 +1,65 @@
+import { mkdirSync } from 'fs';
+
+import * as api from '@actual-app/api';
+
+import { resolveConfig } from './config';
+import type { CliGlobalOpts } from './config';
+
+function info(message: string, quiet?: boolean) {
+  if (!quiet) {
+    process.stderr.write(message + '\n');
+  }
+}
+
+type ConnectionOptions = {
+  loadBudget?: boolean;
+};
+
+export async function withConnection<T>(
+  globalOpts: CliGlobalOpts,
+  fn: () => Promise<T>,
+  options: ConnectionOptions = {},
+): Promise<T> {
+  const { loadBudget = true } = options;
+  const config = await resolveConfig(globalOpts);
+
+  mkdirSync(config.dataDir, { recursive: true });
+
+  info(`Connecting to ${config.serverUrl}...`, globalOpts.quiet);
+
+  if (config.sessionToken) {
+    await api.init({
+      serverURL: config.serverUrl,
+      dataDir: config.dataDir,
+      sessionToken: config.sessionToken,
+      verbose: !globalOpts.quiet,
+    });
+  } else if (config.password) {
+    await api.init({
+      serverURL: config.serverUrl,
+      dataDir: config.dataDir,
+      password: config.password,
+      verbose: !globalOpts.quiet,
+    });
+  } else {
+    throw new Error(
+      'Authentication required. Provide --password or --session-token, or set ACTUAL_PASSWORD / ACTUAL_SESSION_TOKEN.',
+    );
+  }
+
+  try {
+    if (loadBudget && config.budgetId) {
+      info(`Downloading budget ${config.budgetId}...`, globalOpts.quiet);
+      await api.downloadBudget(config.budgetId, {
+        password: config.encryptionPassword,
+      });
+    } else if (loadBudget && !config.budgetId) {
+      throw new Error(
+        'Budget ID is required for this command. Set --budget-id or ACTUAL_BUDGET_ID.',
+      );
+    }
+    return await fn();
+  } finally {
+    await api.shutdown();
+  }
+}
