@@ -746,8 +746,20 @@ async function simpleFinAccounts() {
       },
       60000,
     );
-  } catch {
-    return { error_code: 'TIMED_OUT' };
+  } catch (error) {
+    if (error instanceof PostError && error.reason === 'network-failure') {
+      return {
+        error_code: 'TIMED_OUT',
+        reason: 'Request timed out or the sync server could not be reached.',
+      };
+    }
+    return {
+      error_code: 'REQUEST_FAILED',
+      reason:
+        error instanceof PostError
+          ? `Sync server error: ${error.reason}`
+          : 'An unexpected error occurred.',
+    };
   }
 }
 

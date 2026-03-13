@@ -63,7 +63,11 @@ app.post(
         },
       });
     } catch (e) {
-      serverDown(e, res);
+      if (e.message === 'Forbidden') {
+        invalidToken(res);
+      } else {
+        serverDown(e, res);
+      }
       return;
     }
   }),
@@ -279,13 +283,33 @@ function invalidToken(res) {
 
 function serverDown(e, res) {
   console.log(e);
+
+  let detail = 'There was an error communicating with SimpleFIN.';
+
+  if (e.message === 'Forbidden') {
+    detail =
+      'SimpleFIN rejected the request (403 Forbidden). Your access key may be expired.';
+  } else if (e.message === 'Invalid access key') {
+    detail =
+      'The SimpleFIN access key format is invalid. Please reset and re-enter your credentials.';
+  } else if (e instanceof SyntaxError) {
+    detail =
+      'SimpleFIN returned an invalid response. The service may be temporarily unavailable.';
+  } else if (
+    e.cause?.code === 'ENOTFOUND' ||
+    e.cause?.code === 'ECONNREFUSED' ||
+    e.message?.includes('fetch failed')
+  ) {
+    detail = 'Could not connect to SimpleFIN server.';
+  }
+
   res.send({
     status: 'ok',
     data: {
       error_type: 'SERVER_DOWN',
       error_code: 'SERVER_DOWN',
       status: 'rejected',
-      reason: 'There was an error communicating with SimpleFIN.',
+      reason: detail,
     },
   });
 }

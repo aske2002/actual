@@ -85,8 +85,23 @@ export function CreateAccountModal({
 
     try {
       const results = await send('simplefin-accounts');
+      if (results.error_code === 'INVALID_ACCESS_TOKEN') {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'simplefin-init',
+              options: {
+                onSuccess: () => setIsSimpleFinSetupComplete(true),
+              },
+            },
+          }),
+        );
+        return;
+      }
       if (results.error_code) {
-        throw new Error(results.reason);
+        throw new Error(
+          results.reason || `SimpleFIN error: ${results.error_code}`,
+        );
       }
 
       const newAccounts = [];
@@ -127,12 +142,12 @@ export function CreateAccountModal({
     } catch (err) {
       console.error(err);
       dispatch(
-        pushModal({
-          modal: {
-            name: 'simplefin-init',
-            options: {
-              onSuccess: () => setIsSimpleFinSetupComplete(true),
-            },
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error when trying to contact SimpleFIN'),
+            message: (err as Error).message || t('An unknown error occurred.'),
+            timeout: 10000,
           },
         }),
       );
