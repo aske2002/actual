@@ -81,3 +81,6 @@ build/
 
 *storybook.log
 storybook-static
+
+# Theme validation (CI artifact)
+theme-validation-results.json
