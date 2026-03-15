@@ -5,8 +5,8 @@ import * as api from '@actual-app/api';
 import { resolveConfig } from './config';
 import type { CliGlobalOpts } from './config';
 
-function info(message: string, quiet?: boolean) {
-  if (!quiet) {
+function info(message: string, verbose?: boolean) {
+  if (verbose) {
     process.stderr.write(message + '\n');
   }
 }
@@ -25,21 +25,21 @@ export async function withConnection<T>(
 
   mkdirSync(config.dataDir, { recursive: true });
 
-  info(`Connecting to ${config.serverUrl}...`, globalOpts.quiet);
+  info(`Connecting to ${config.serverUrl}...`, globalOpts.verbose);
 
   if (config.sessionToken) {
     await api.init({
       serverURL: config.serverUrl,
       dataDir: config.dataDir,
       sessionToken: config.sessionToken,
-      verbose: !globalOpts.quiet,
+      verbose: globalOpts.verbose,
     });
   } else if (config.password) {
     await api.init({
       serverURL: config.serverUrl,
       dataDir: config.dataDir,
       password: config.password,
-      verbose: !globalOpts.quiet,
+      verbose: globalOpts.verbose,
     });
   } else {
     throw new Error(
@@ -49,7 +49,7 @@ export async function withConnection<T>(
 
   try {
     if (loadBudget && config.budgetId) {
-      info(`Downloading budget ${config.budgetId}...`, globalOpts.quiet);
+      info(`Downloading budget ${config.budgetId}...`, globalOpts.verbose);
       await api.downloadBudget(config.budgetId, {
         password: config.encryptionPassword,
       });

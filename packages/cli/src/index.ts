@@ -37,7 +37,7 @@ program
       .choices(['json', 'table', 'csv'] as const)
       .default('json'),
   )
-  .option('--quiet', 'Suppress informational messages', false);
+  .option('--verbose', 'Show informational messages', false);
 
 registerAccountsCommand(program);
 registerBudgetsCommand(program);

@@ -75,7 +75,7 @@ Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.js`
 | `--budget-id <id>`        | Budget Sync ID                                  |
 | `--data-dir <path>`       | Data directory                                  |
 | `--format <format>`       | Output format: `json` (default), `table`, `csv` |
-| `--quiet`                 | Suppress informational stderr messages          |
+| `--verbose`               | Show informational messages                     |
 
 ## Commands
 

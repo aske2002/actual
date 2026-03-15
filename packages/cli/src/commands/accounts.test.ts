@@ -64,7 +64,7 @@ describe('accounts commands', () => {
   describe('list', () => {
     it('calls api.getAccounts and prints result', async () => {
       const accounts = [{ id: '1', name: 'Checking' }];
-      vi.mocked(api.getAccounts).mockResolvedValue(accounts as never);
+      vi.mocked(api.getAccounts).mockResolvedValue(accounts);
 
       await run(['accounts', 'list']);
 
@@ -73,7 +73,7 @@ describe('accounts commands', () => {
     });
 
     it('passes format option to printOutput', async () => {
-      vi.mocked(api.getAccounts).mockResolvedValue([] as never);
+      vi.mocked(api.getAccounts).mockResolvedValue([]);
 
       await run(['--format', 'csv', 'accounts', 'list']);
 

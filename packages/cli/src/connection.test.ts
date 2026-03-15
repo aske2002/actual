@@ -45,9 +45,10 @@ describe('withConnection', () => {
     await withConnection({}, async () => 'ok');
 
     expect(api.init).toHaveBeenCalledWith({
-      serverUrl: 'http://test',
+      serverURL: 'http://test',
       password: 'pw',
       dataDir: '/tmp/data',
+      verbose: undefined,
     });
   });
 
@@ -57,9 +58,10 @@ describe('withConnection', () => {
     await withConnection({}, async () => 'ok');
 
     expect(api.init).toHaveBeenCalledWith({
-      serverUrl: 'http://test',
+      serverURL: 'http://test',
       sessionToken: 'tok',
       dataDir: '/tmp/data',
+      verbose: undefined,
     });
   });
 
@@ -117,17 +119,17 @@ describe('withConnection', () => {
     expect(api.shutdown).toHaveBeenCalled();
   });
 
-  it('writes info to stderr when not quiet', async () => {
+  it('does not write to stderr by default', async () => {
     await withConnection({}, async () => 'ok');
+
+    expect(stderrSpy).not.toHaveBeenCalled();
+  });
+
+  it('writes info to stderr when verbose', async () => {
+    await withConnection({ verbose: true }, async () => 'ok');
 
     expect(stderrSpy).toHaveBeenCalledWith(
       expect.stringContaining('Connecting to'),
     );
-  });
-
-  it('does not write to stderr when quiet', async () => {
-    await withConnection({ quiet: true }, async () => 'ok');
-
-    expect(stderrSpy).not.toHaveBeenCalled();
   });
 });

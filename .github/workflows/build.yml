@@ -90,7 +90,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Build CLI
-        run: cd packages/cli && yarn build
+        run: yarn build:cli
       - name: Create package tgz
         run: cd packages/cli && yarn pack && mv package.tgz actual-cli.tgz
       - name: Upload Build

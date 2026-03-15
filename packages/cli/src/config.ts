@@ -20,7 +20,7 @@ export type CliGlobalOpts = {
   dataDir?: string;
   encryptionPassword?: string;
   format?: 'json' | 'table' | 'csv';
-  quiet?: boolean;
+  verbose?: boolean;
 };
 
 type ConfigFileContent = {
