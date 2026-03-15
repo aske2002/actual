@@ -9,6 +9,17 @@
   ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./@types/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
   "scripts": {
     "build": "yarn workspace @actual-app/core exec tsgo && vite build && node scripts/inline-loot-core-types.mjs",
     "test": "vitest --run",
