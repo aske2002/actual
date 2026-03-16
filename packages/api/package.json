@@ -8,9 +8,24 @@
     "dist"
   ],
   "main": "dist/index.js",
+  "module": "dist/browser.js",
   "types": "@types/index.d.ts",
+  "exports": {
+    ".": {
+      "browser": {
+        "types": "./@types/index.d.ts",
+        "default": "./dist/browser.js"
+      },
+      "default": {
+        "types": "./@types/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vite build --config vite.browser.config.ts",
+    "build:node": "vite build",
+    "build:browser": "vite build --config vite.browser.config.ts",
     "test": "vitest --run",
     "typecheck": "tsgo -b && tsc-strict"
   },
