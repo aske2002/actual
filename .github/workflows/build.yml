@@ -93,11 +93,18 @@ jobs:
         run: yarn build:cli
       - name: Create package tgz
         run: cd packages/cli && yarn pack && mv package.tgz actual-cli.tgz
+      - name: Prepare bundle stats artifact
+        run: cp packages/cli/dist/stats.json cli-stats.json
       - name: Upload Build
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: actual-cli
           path: packages/cli/actual-cli.tgz
+      - name: Upload CLI bundle stats
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: cli-build-stats
+          path: cli-stats.json
 
   server:
     runs-on: ubuntu-latest

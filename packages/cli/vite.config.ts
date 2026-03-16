@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 
 const pkg = JSON.parse(
@@ -27,5 +28,9 @@ export default defineConfig({
         banner: chunk => (chunk.isEntry ? '#!/usr/bin/env node' : ''),
       },
     },
+  },
+  plugins: [visualizer({ template: 'raw-data', filename: 'dist/stats.json' })],
+  test: {
+    globals: true,
   },
 });

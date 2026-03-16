@@ -136,9 +136,11 @@ jobs:
             --base desktop-client=./base/web-stats.json \
             --base loot-core=./base/loot-core-stats.json \
             --base api=./base/api-stats.json \
+            --base cli=./base/cli-stats.json \
             --head desktop-client=./head/web-stats.json \
             --head loot-core=./head/loot-core-stats.json \
             --head api=./head/api-stats.json \
+            --head cli=./head/cli-stats.json \
             --identifier combined \
             --format pr-body > bundle-stats-comment.md
       - name: Post combined bundle stats comment
