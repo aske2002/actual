@@ -11,7 +11,7 @@ The CLI is **experimental** and its commands, options, and behavior are **likely
 The `@actual-app/cli` package provides a command-line interface for interacting with your Actual Budget data. It connects to your sync server and lets you query and modify budgets, accounts, transactions, categories, payees, rules, schedules, and more — all from the terminal.
 
 :::note
-This is different from the [sync-server CLI tool](../install/cli-tool.md) (`@actual-app/sync-server`), which is used to host and manage the Actual server itself.
+This is different from the [Server CLI](../install/cli-tool.md) (`@actual-app/sync-server`), which is used to host and manage the Actual server itself.
 :::
 
 ## Installation
