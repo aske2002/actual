@@ -48,14 +48,14 @@ export async function withConnection<T>(
   }
 
   try {
-    if (loadBudget && config.budgetId) {
-      info(`Downloading budget ${config.budgetId}...`, globalOpts.verbose);
-      await api.downloadBudget(config.budgetId, {
+    if (loadBudget && config.syncId) {
+      info(`Downloading budget ${config.syncId}...`, globalOpts.verbose);
+      await api.downloadBudget(config.syncId, {
         password: config.encryptionPassword,
       });
-    } else if (loadBudget && !config.budgetId) {
+    } else if (loadBudget && !config.syncId) {
       throw new Error(
-        'Budget ID is required for this command. Set --budget-id or ACTUAL_BUDGET_ID.',
+        'Sync ID is required for this command. Set --sync-id or ACTUAL_SYNC_ID.',
       );
     }
     return await fn();

@@ -25,7 +25,7 @@ describe('resolveConfig', () => {
     'ACTUAL_SERVER_URL',
     'ACTUAL_PASSWORD',
     'ACTUAL_SESSION_TOKEN',
-    'ACTUAL_BUDGET_ID',
+    'ACTUAL_SYNC_ID',
     'ACTUAL_DATA_DIR',
   ];
 
@@ -83,14 +83,14 @@ describe('resolveConfig', () => {
       mockConfigFile({
         serverUrl: 'http://file',
         password: 'filepw',
-        budgetId: 'budget-1',
+        syncId: 'budget-1',
       });
 
       const config = await resolveConfig({});
 
       expect(config.serverUrl).toBe('http://file');
       expect(config.password).toBe('filepw');
-      expect(config.budgetId).toBe('budget-1');
+      expect(config.syncId).toBe('budget-1');
     });
   });
 

@@ -37,7 +37,7 @@ The CLI requires a connection to a running Actual sync server. Configuration can
 | Variable               | Description                                         |
 | ---------------------- | --------------------------------------------------- |
 | `ACTUAL_SERVER_URL`    | URL of the Actual sync server (required)            |
-| `ACTUAL_BUDGET_ID`     | Budget ID to load (required for most commands)      |
+| `ACTUAL_SYNC_ID`       | Budget Sync ID (required for most commands)         |
 | `ACTUAL_PASSWORD`      | Server password (one of password or token required) |
 | `ACTUAL_SESSION_TOKEN` | Session token (alternative to password)             |
 
@@ -50,7 +50,7 @@ Global flags override environment variables:
 | `--server-url <url>`      | Server URL                                      |
 | `--password <pw>`         | Server password                                 |
 | `--session-token <token>` | Session token                                   |
-| `--budget-id <id>`        | Budget ID                                       |
+| `--sync-id <id>`          | Budget Sync ID                                  |
 | `--data-dir <path>`       | Local data directory for cached budget data     |
 | `--format <format>`       | Output format: `json` (default), `table`, `csv` |
 | `--verbose`               | Show informational messages on stderr           |
@@ -70,7 +70,7 @@ Example `.actualrc.json`:
 {
   "serverUrl": "http://localhost:5006",
   "password": "your-password",
-  "budgetId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f"
+  "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f"
 }
 ```
 

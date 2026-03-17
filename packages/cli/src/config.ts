@@ -7,7 +7,7 @@ export type CliConfig = {
   serverUrl: string;
   password?: string;
   sessionToken?: string;
-  budgetId?: string;
+  syncId?: string;
   dataDir: string;
   encryptionPassword?: string;
 };
@@ -16,7 +16,7 @@ export type CliGlobalOpts = {
   serverUrl?: string;
   password?: string;
   sessionToken?: string;
-  budgetId?: string;
+  syncId?: string;
   dataDir?: string;
   encryptionPassword?: string;
   format?: 'json' | 'table' | 'csv';
@@ -27,7 +27,7 @@ type ConfigFileContent = {
   serverUrl?: string;
   password?: string;
   sessionToken?: string;
-  budgetId?: string;
+  syncId?: string;
   dataDir?: string;
   encryptionPassword?: string;
 };
@@ -71,8 +71,8 @@ export async function resolveConfig(
     process.env.ACTUAL_SESSION_TOKEN ??
     fileConfig.sessionToken;
 
-  const budgetId =
-    cliOpts.budgetId ?? process.env.ACTUAL_BUDGET_ID ?? fileConfig.budgetId;
+  const syncId =
+    cliOpts.syncId ?? process.env.ACTUAL_SYNC_ID ?? fileConfig.syncId;
 
   const dataDir =
     cliOpts.dataDir ??
@@ -101,7 +101,7 @@ export async function resolveConfig(
     serverUrl,
     password,
     sessionToken,
-    budgetId,
+    syncId,
     dataDir,
     encryptionPassword,
   };

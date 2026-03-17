@@ -29,7 +29,7 @@ function createProgram(): Command {
   program.option('--server-url <url>');
   program.option('--password <pw>');
   program.option('--session-token <token>');
-  program.option('--budget-id <id>');
+  program.option('--sync-id <id>');
   program.option('--data-dir <dir>');
   program.option('--verbose');
   program.exitOverride();

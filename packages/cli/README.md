@@ -20,7 +20,7 @@ Requires Node.js >= 22.
 # Set connection details
 export ACTUAL_SERVER_URL=http://localhost:5006
 export ACTUAL_PASSWORD=your-password
-export ACTUAL_BUDGET_ID=your-sync-id   # Found in Settings → Advanced → Sync ID
+export ACTUAL_SYNC_ID=your-sync-id   # Found in Settings → Advanced → Sync ID
 
 # List your accounts
 actual accounts list
@@ -48,7 +48,7 @@ Configuration is resolved in this order (highest priority first):
 | `ACTUAL_SERVER_URL`    | URL of the Actual sync server (required)      |
 | `ACTUAL_PASSWORD`      | Server password (required unless using token) |
 | `ACTUAL_SESSION_TOKEN` | Session token (alternative to password)       |
-| `ACTUAL_BUDGET_ID`     | Budget Sync ID (required for most commands)   |
+| `ACTUAL_SYNC_ID`       | Budget Sync ID (required for most commands)   |
 | `ACTUAL_DATA_DIR`      | Local directory for cached budget data        |
 
 ### Config File
@@ -59,7 +59,7 @@ Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.js`
 {
   "serverUrl": "http://localhost:5006",
   "password": "your-password",
-  "budgetId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f"
+  "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f"
 }
 ```
 
@@ -72,7 +72,7 @@ Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.js`
 | `--server-url <url>`      | Server URL                                      |
 | `--password <pw>`         | Server password                                 |
 | `--session-token <token>` | Session token                                   |
-| `--budget-id <id>`        | Budget Sync ID                                  |
+| `--sync-id <id>`          | Budget Sync ID                                  |
 | `--data-dir <path>`       | Data directory                                  |
 | `--format <format>`       | Output format: `json` (default), `table`, `csv` |
 | `--verbose`               | Show informational messages                     |
@@ -146,7 +146,7 @@ yarn start:server-dev
 # 4. Run the CLI directly from the build output
 ACTUAL_SERVER_URL=http://localhost:5006 \
 ACTUAL_PASSWORD=your-password \
-ACTUAL_BUDGET_ID=your-sync-id \
+ACTUAL_SYNC_ID=your-sync-id \
 node packages/cli/dist/cli.js accounts list
 
 # Or use a shorthand alias for convenience

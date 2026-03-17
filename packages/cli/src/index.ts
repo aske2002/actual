@@ -26,7 +26,7 @@ program
     '--session-token <token>',
     'Session token (env: ACTUAL_SESSION_TOKEN)',
   )
-  .option('--budget-id <id>', 'Budget ID to load (env: ACTUAL_BUDGET_ID)')
+  .option('--sync-id <id>', 'Budget sync ID (env: ACTUAL_SYNC_ID)')
   .option('--data-dir <path>', 'Data directory (env: ACTUAL_DATA_DIR)')
   .option(
     '--encryption-password <password>',

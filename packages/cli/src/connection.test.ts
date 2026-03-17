@@ -18,7 +18,7 @@ function setConfig(overrides: Record<string, unknown> = {}) {
     serverUrl: 'http://test',
     password: 'pw',
     dataDir: '/tmp/data',
-    budgetId: 'budget-1',
+    syncId: 'budget-1',
     ...overrides,
   });
 }
@@ -64,8 +64,8 @@ describe('withConnection', () => {
     });
   });
 
-  it('calls api.downloadBudget when budgetId is set', async () => {
-    setConfig({ budgetId: 'budget-1' });
+  it('calls api.downloadBudget when syncId is set', async () => {
+    setConfig({ syncId: 'budget-1' });
 
     await withConnection({}, async () => 'ok');
 
@@ -74,16 +74,16 @@ describe('withConnection', () => {
     });
   });
 
-  it('throws when loadBudget is true but budgetId is not set', async () => {
-    setConfig({ budgetId: undefined });
+  it('throws when loadBudget is true but syncId is not set', async () => {
+    setConfig({ syncId: undefined });
 
     await expect(withConnection({}, async () => 'ok')).rejects.toThrow(
-      'Budget ID is required',
+      'Sync ID is required',
     );
   });
 
-  it('skips budget download when loadBudget is false and budgetId is not set', async () => {
-    setConfig({ budgetId: undefined });
+  it('skips budget download when loadBudget is false and syncId is not set', async () => {
+    setConfig({ syncId: undefined });
 
     await withConnection({}, async () => 'ok', { loadBudget: false });
 
@@ -91,7 +91,7 @@ describe('withConnection', () => {
   });
 
   it('does not call api.downloadBudget when loadBudget is false', async () => {
-    setConfig({ budgetId: 'budget-1' });
+    setConfig({ syncId: 'budget-1' });
 
     await withConnection({}, async () => 'ok', { loadBudget: false });
 
