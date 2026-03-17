@@ -351,11 +351,14 @@
           {
             "group": ["**/style/themes/*"],
             "message": "Please do not import theme files directly"
+          },
+          {
+            "group": ["@actual-app/web/**/*"],
+            "message": "Please do not import `@actual-app/web` in `loot-core`"
           }
         ]
       }
     ],
-    "actual/no-cross-package-imports": "error",
     "eslint/no-useless-constructor": "error",
     "eslint/no-undef": "error",
     "eslint/no-unused-expressions": "error"
