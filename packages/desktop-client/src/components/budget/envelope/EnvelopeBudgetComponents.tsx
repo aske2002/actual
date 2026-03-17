@@ -606,9 +606,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             longGoal={envelopeBudget.catLongGoal(category.id)}
             tooltipDisabled={balanceMenuOpen}
             balanceAdjustment={
-              showScheduled && scheduledAmount !== 0
-                ? scheduledAmount
-                : 0
+              showScheduled && scheduledAmount !== 0 ? scheduledAmount : 0
             }
           />
         </Button>

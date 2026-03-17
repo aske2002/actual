@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 import { handleError } from '../app-gocardless/util/handle-error';
 import {
@@ -38,9 +38,7 @@ app.get('/link', function (req, res) {
 
   if (code && state) {
     pendingCodes.set(state, code);
-    console.log(
-      `[EnableBanking] Stored authorization code for state=${state}`,
-    );
+    console.log(`[EnableBanking] Stored authorization code for state=${state}`);
     // Clean up after 10 minutes
     setTimeout(() => pendingCodes.delete(state), 10 * 60 * 1000);
   } else {
@@ -175,10 +173,7 @@ app.post(
         },
       });
     } catch (error) {
-      console.error(
-        '[EnableBanking] /create-web-token error:',
-        error.message,
-      );
+      console.error('[EnableBanking] /create-web-token error:', error.message);
       res.send({
         status: 'ok',
         data: {
@@ -250,7 +245,9 @@ app.post(
         // If accounts came back immediately, return them
         if (session.accounts && session.accounts.length > 0) {
           const accounts = mapAccounts(session.accounts, aspspName);
-          console.log(`[EnableBanking] Got ${accounts.length} accounts immediately`);
+          console.log(
+            `[EnableBanking] Got ${accounts.length} accounts immediately`,
+          );
           res.send({ status: 'ok', data: { accounts } });
           return;
         }
@@ -464,10 +461,7 @@ function mapAccounts(rawAccounts, aspspName) {
   return rawAccounts.map(account => ({
     account_id: account.uid || account.resource_id,
     name:
-      account.account_name ||
-      account.product ||
-      account.iban ||
-      account.uid,
+      account.account_name || account.product || account.iban || account.uid,
     institution: aspspName,
     mask: account.iban ? account.iban.slice(-4) : null,
     official_name:

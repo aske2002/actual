@@ -1,11 +1,9 @@
 import React, { createContext, useContext } from 'react';
 import type { PropsWithChildren } from 'react';
 
-import type {
-  ScheduledAmountsByCategory,
-} from '@desktop-client/hooks/useScheduledAmountsForBudget';
-import { useScheduledAmountsForBudget } from '@desktop-client/hooks/useScheduledAmountsForBudget';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import type { ScheduledAmountsByCategory } from '@desktop-client/hooks/useScheduledAmountsForBudget';
+import { useScheduledAmountsForBudget } from '@desktop-client/hooks/useScheduledAmountsForBudget';
 
 type ScheduledAmountsContextValue = {
   showScheduled: boolean;
@@ -32,8 +30,7 @@ export function ScheduledAmountsProvider({
     'budget.showScheduled',
   );
 
-  const { scheduledAmounts, isLoading } =
-    useScheduledAmountsForBudget(months);
+  const { scheduledAmounts, isLoading } = useScheduledAmountsForBudget(months);
 
   const toggleShowScheduled = () => {
     setShowScheduled(!showScheduled);

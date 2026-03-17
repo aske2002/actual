@@ -226,8 +226,7 @@ export function BudgetTable(props: BudgetTableProps) {
     const endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
     const validStart =
       startMonth < monthBounds.start ? monthBounds.start : startMonth;
-    const validEnd =
-      endMonth > monthBounds.end ? monthBounds.end : endMonth;
+    const validEnd = endMonth > monthBounds.end ? monthBounds.end : endMonth;
     return monthUtils.rangeInclusive(validStart, validEnd);
   }, [startMonth, numMonths, monthBounds]);
 

@@ -80,7 +80,10 @@ function countOccurrencesInMonth(
   switch (config.frequency) {
     case 'monthly': {
       // Check if this month aligns with the interval
-      const monthDiff = monthUtils.differenceInCalendarMonths(month, startMonth);
+      const monthDiff = monthUtils.differenceInCalendarMonths(
+        month,
+        startMonth,
+      );
       if (monthDiff % interval !== 0) {
         return 0;
       }
@@ -141,7 +144,11 @@ function getCategoryFromActions(
 
   for (const action of schedule._actions) {
     const a = action as { op: string; field?: string; value?: unknown };
-    if (a.op === 'set' && a.field === 'category' && typeof a.value === 'string') {
+    if (
+      a.op === 'set' &&
+      a.field === 'category' &&
+      typeof a.value === 'string'
+    ) {
       return a.value;
     }
   }
@@ -194,7 +201,9 @@ async function fetchScheduleCategoriesFromTransactions(
  */
 export function useScheduledAmountsForBudget(months: string[]) {
   const { schedules, isLoading: schedulesLoading } = useCachedSchedules();
-  const [categoryMap, setCategoryMap] = useState<ScheduleCategoryMap>(new Map());
+  const [categoryMap, setCategoryMap] = useState<ScheduleCategoryMap>(
+    new Map(),
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   // Build category map: first from actions, then query transactions for the rest
@@ -224,7 +233,7 @@ export function useScheduledAmountsForBudget(months: string[]) {
     }
 
     let cancelled = false;
-    fetchScheduleCategoriesFromTransactions(needsLookup).then(
+    void fetchScheduleCategoriesFromTransactions(needsLookup).then(
       transactionMap => {
         if (cancelled) return;
         const combined = new Map([...actionCategories, ...transactionMap]);

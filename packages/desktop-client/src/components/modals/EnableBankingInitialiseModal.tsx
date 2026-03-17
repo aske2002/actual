@@ -8,7 +8,6 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import { css } from '@emotion/css';
 
 import { send } from 'loot-core/platform/client/connection';
@@ -148,9 +147,7 @@ export const EnableBankingInitialiseModal = ({
                   backgroundColor: theme.tableBackground,
                   color: theme.tableText,
                 })}
-                placeholder={t(
-                  'Paste the contents of your .pem file here...',
-                )}
+                placeholder={t('Paste the contents of your .pem file here...')}
                 value={privateKey}
                 onChange={e => {
                   setPrivateKey(e.target.value);

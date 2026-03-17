@@ -570,9 +570,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               budgeted={trackingBudget.catBudgeted(category.id)}
               longGoal={trackingBudget.catLongGoal(category.id)}
               balanceAdjustment={
-                showScheduled && scheduledAmount !== 0
-                  ? scheduledAmount
-                  : 0
+                showScheduled && scheduledAmount !== 0 ? scheduledAmount : 0
               }
             />
           </Button>
