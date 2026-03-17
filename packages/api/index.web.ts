@@ -4,8 +4,7 @@ import type { InitConfig, lib } from '@actual-app/core/server/main';
 export * from './methods';
 export * as utils from './utils';
 
-/** @deprecated Please use return value of `init` instead */
-export let internal: typeof lib | null = null;
+let internal: typeof lib | null = null;
 
 export async function init(config: InitConfig = {}) {
   internal = await initLootCore(config);

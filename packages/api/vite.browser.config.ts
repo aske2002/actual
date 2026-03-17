@@ -16,12 +16,6 @@ export default defineConfig({
       formats: ['es'],
       fileName: () => 'browser.js',
     },
-    rollupOptions: {
-      external: [
-        // These are browser APIs provided by the environment
-        /^node:/,
-      ],
-    },
   },
   plugins: [peggyLoader()],
   resolve: {

@@ -23,7 +23,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && vite build --config vite.browser.config.ts",
+    "build": "yarn build:node && yarn build:browser",
     "build:node": "vite build",
     "build:browser": "vite build --config vite.browser.config.ts",
     "test": "vitest --run",
