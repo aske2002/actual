@@ -120,6 +120,45 @@ export type Modal =
       };
     }
   | {
+      name: 'enablebanking-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-external-msg';
+      options: {
+        onMoveExternal: (arg: {
+          aspspName: string;
+          aspspCountry: string;
+        }) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | {
+              data: {
+                accounts: Array<{
+                  account_id: string;
+                  name: string;
+                  institution: string;
+                  mask: string | null;
+                  official_name: string;
+                }>;
+              };
+            }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: {
+          accounts: Array<{
+            account_id: string;
+            name: string;
+            institution: string;
+            mask: string | null;
+            official_name: string;
+          }>;
+        }) => Promise<void>;
+      };
+    }
+  | {
       name: 'gocardless-external-msg';
       options: {
         onMoveExternal: (arg: {

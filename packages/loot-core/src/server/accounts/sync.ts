@@ -276,6 +276,49 @@ async function downloadSimpleFinTransactions(
   return retVal;
 }
 
+async function downloadEnableBankingTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from EnableBanking', {
+    acctId,
+    since,
+    server: getServer().ENABLEBANKING_SERVER,
+  });
+
+  const res = await post(
+    getServer().ENABLEBANKING_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  } else if ('error' in res) {
+    throw BankSyncError('Connection', res.error);
+  }
+
+  let retVal = {};
+  const singleRes = res as BankSyncResponse;
+  retVal = {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
+
+  logger.log('Response:', retVal);
+  return retVal;
+}
+
 async function downloadPluggyAiTransactions(
   acctId: AccountEntity['id'],
   since: string,
@@ -1064,6 +1107,17 @@ export async function syncAccount(
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'enableBanking') {
+    // EnableBanking (PSD2) supports up to 730 days of history,
+    // unlike GoCardless which is limited to 90 days.
+    const enableBankingStartDate =
+      customStartingDate ??
+      (oldestTransaction?.date ||
+        monthUtils.subDays(monthUtils.currentDay(), 730));
+    download = await downloadEnableBankingTransactions(
+      acctId,
+      enableBankingStartDate,
+    );
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,
