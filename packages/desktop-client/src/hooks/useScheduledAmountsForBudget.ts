@@ -156,6 +156,55 @@ function getCategoryFromActions(
   return null;
 }
 
+// Map<scheduleId, Map<month, count>>
+type MatchedTransactionCounts = Map<string, Map<string, number>>;
+
+/**
+ * Queries transactions already linked to schedules in the given months.
+ * Returns count of matched transactions per schedule per month,
+ * so we can avoid double-counting.
+ */
+async function fetchMatchedTransactionCounts(
+  scheduleIds: string[],
+  months: string[],
+): Promise<MatchedTransactionCounts> {
+  const result: MatchedTransactionCounts = new Map();
+
+  if (scheduleIds.length === 0 || months.length === 0) {
+    return result;
+  }
+
+  const firstMonth = months[0];
+  const lastMonth = months[months.length - 1];
+  const startDate = firstMonth + '-01';
+  const endDate = monthUtils.addMonths(lastMonth, 1) + '-01';
+
+  const queryResult = await aqlQuery(
+    q('transactions')
+      .filter({
+        schedule: { $oneof: scheduleIds },
+        date: { $gte: startDate, $lt: endDate },
+      })
+      .select(['schedule', 'date']),
+  );
+
+  if (queryResult?.data) {
+    for (const row of queryResult.data as Array<{
+      schedule: string;
+      date: string;
+    }>) {
+      const month = monthUtils.getMonth(row.date);
+      if (!result.has(row.schedule)) {
+        result.set(row.schedule, new Map());
+      }
+      const monthMap = result.get(row.schedule)!;
+      monthMap.set(month, (monthMap.get(month) || 0) + 1);
+    }
+  }
+
+  return result;
+}
+
 /**
  * Queries past transactions linked to schedules to determine their categories.
  * Returns a map of scheduleId -> categoryId.
@@ -204,9 +253,12 @@ export function useScheduledAmountsForBudget(months: string[]) {
   const [categoryMap, setCategoryMap] = useState<ScheduleCategoryMap>(
     new Map(),
   );
+  const [matchedCounts, setMatchedCounts] = useState<MatchedTransactionCounts>(
+    new Map(),
+  );
   const [isLoading, setIsLoading] = useState(true);
 
-  // Build category map: first from actions, then query transactions for the rest
+  // Build category map and fetch matched transaction counts
   useEffect(() => {
     if (schedulesLoading) {
       return;
@@ -216,6 +268,7 @@ export function useScheduledAmountsForBudget(months: string[]) {
     const needsLookup: string[] = [];
 
     const activeSchedules = schedules.filter(s => !s.completed && !s.tombstone);
+    const activeIds = activeSchedules.map(s => s.id);
 
     for (const schedule of activeSchedules) {
       const cat = getCategoryFromActions(schedule);
@@ -226,18 +279,21 @@ export function useScheduledAmountsForBudget(months: string[]) {
       }
     }
 
-    if (needsLookup.length === 0) {
-      setCategoryMap(actionCategories);
-      setIsLoading(false);
-      return;
-    }
-
     let cancelled = false;
-    void fetchScheduleCategoriesFromTransactions(needsLookup).then(
-      transactionMap => {
+
+    const categoryPromise =
+      needsLookup.length > 0
+        ? fetchScheduleCategoriesFromTransactions(needsLookup)
+        : Promise.resolve(new Map<string, string>());
+
+    const matchedPromise = fetchMatchedTransactionCounts(activeIds, months);
+
+    void Promise.all([categoryPromise, matchedPromise]).then(
+      ([transactionMap, matched]) => {
         if (cancelled) return;
         const combined = new Map([...actionCategories, ...transactionMap]);
         setCategoryMap(combined);
+        setMatchedCounts(matched);
         setIsLoading(false);
       },
     );
@@ -245,7 +301,7 @@ export function useScheduledAmountsForBudget(months: string[]) {
     return () => {
       cancelled = true;
     };
-  }, [schedules, schedulesLoading]);
+  }, [schedules, schedulesLoading, months]);
 
   // Compute scheduled amounts per category per month
   const scheduledAmounts = useMemo<ScheduledAmountsByCategory>(() => {
@@ -268,20 +324,34 @@ export function useScheduledAmountsForBudget(months: string[]) {
         continue;
       }
 
-      const occurrences = getScheduleOccurrencesPerMonth(schedule, months);
+      const currentMonth = monthUtils.currentMonth();
+      // Only compute scheduled amounts for current and future months
+      const relevantMonths = months.filter(m => m >= currentMonth);
+      const occurrences = getScheduleOccurrencesPerMonth(
+        schedule,
+        relevantMonths,
+      );
+      const scheduleMatched = matchedCounts.get(schedule.id);
 
       for (const [month, count] of occurrences) {
+        // Subtract already-matched transactions to avoid double-counting
+        const alreadyMatched = scheduleMatched?.get(month) || 0;
+        const remaining = Math.max(0, count - alreadyMatched);
+        if (remaining === 0) {
+          continue;
+        }
+
         if (!result.has(categoryId)) {
           result.set(categoryId, new Map());
         }
         const monthMap = result.get(categoryId)!;
         const current = monthMap.get(month) || 0;
-        monthMap.set(month, current + amount * count);
+        monthMap.set(month, current + amount * remaining);
       }
     }
 
     return result;
-  }, [schedules, schedulesLoading, categoryMap, isLoading, months]);
+  }, [schedules, schedulesLoading, categoryMap, matchedCounts, isLoading, months]);
 
   return { scheduledAmounts, isLoading: isLoading || schedulesLoading };
 }

@@ -40,6 +40,7 @@ export type BudgetHandlers = {
   'budget/cover-overbudgeted': typeof actions.coverOverbudgeted;
   'budget/transfer-category': typeof actions.transferCategory;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
+  'budget/reconcile-past-months': typeof actions.reconcilePastMonths;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
@@ -125,6 +126,10 @@ app.method(
 app.method(
   'budget/set-carryover',
   mutator(undoable(actions.setCategoryCarryover)),
+);
+app.method(
+  'budget/reconcile-past-months',
+  mutator(undoable(actions.reconcilePastMonths)),
 );
 app.method(
   'budget/reset-income-carryover',

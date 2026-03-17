@@ -14,12 +14,15 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import * as monthUtils from 'loot-core/shared/months';
+
 import { RenderMonths } from './RenderMonths';
 import { useScheduledAmounts } from './ScheduledAmountsContext';
 import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
 
+import { useBudgetActions } from '@desktop-client/budget';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type BudgetTotalsProps = {
@@ -38,6 +41,7 @@ export const BudgetTotals = memo(function BudgetTotals({
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
   const { showScheduled, toggleShowScheduled } = useScheduledAmounts();
+  const budgetActions = useBudgetActions();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -163,6 +167,11 @@ export const BudgetTotals = memo(function BudgetTotals({
                 collapseAllCategories();
               } else if (type === 'toggle-scheduled') {
                 toggleShowScheduled();
+              } else if (type === 'reconcile-past-months') {
+                budgetActions.mutate({
+                  type: 'reconcile-past-months',
+                  month: monthUtils.currentMonth(),
+                });
               }
               setMenuOpen(false);
             }}
@@ -185,6 +194,10 @@ export const BudgetTotals = memo(function BudgetTotals({
                 text: showScheduled
                   ? t('Hide scheduled spending')
                   : t('Show scheduled spending'),
+              },
+              {
+                name: 'reconcile-past-months',
+                text: t('Reconcile past months'),
               },
             ]}
           />

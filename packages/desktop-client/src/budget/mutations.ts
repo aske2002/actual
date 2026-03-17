@@ -649,6 +649,11 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
       };
+    }
+  | {
+      type: 'reconcile-past-months';
+      month: string;
+      args?: never;
     };
 
 export function useBudgetActions() {
@@ -776,6 +781,11 @@ export function useBudgetActions() {
           await send('budget/copy-single-month', {
             month,
             category: args.category,
+          });
+          return null;
+        case 'reconcile-past-months':
+          await send('budget/reconcile-past-months', {
+            currentMonth: month,
           });
           return null;
         default:

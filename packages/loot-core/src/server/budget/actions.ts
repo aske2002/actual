@@ -668,6 +668,34 @@ async function addMovementNotes({
   });
 }
 
+export async function reconcilePastMonths({
+  currentMonth,
+}: {
+  currentMonth: string;
+}): Promise<void> {
+  const categories = await db.all<db.DbViewCategory>(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  const { createdMonths } = sheet.get().meta();
+  const pastMonths = [...(createdMonths as Set<string>)].filter(
+    m => m < currentMonth,
+  );
+  pastMonths.sort();
+
+  await batchMessages(async () => {
+    for (const month of pastMonths) {
+      const sheetName = monthUtils.sheetForMonth(month);
+      for (const cat of categories) {
+        const spent = await getSheetValue(sheetName, 'sum-amount-' + cat.id);
+        // Set budget to -spent so balance becomes 0
+        // (spent is negative for expenses, so -spent is positive)
+        void setBudget({ category: cat.id, month, amount: -spent });
+      }
+    }
+  });
+}
+
 export async function resetIncomeCarryover({
   month,
 }: {
