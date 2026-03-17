@@ -52,32 +52,39 @@ describe('resolveConfig', () => {
     it('CLI opts take highest priority', async () => {
       process.env.ACTUAL_SERVER_URL = 'http://env';
       process.env.ACTUAL_PASSWORD = 'envpw';
+      process.env.ACTUAL_ENCRYPTION_PASSWORD = 'env-enc';
       mockConfigFile({
         serverUrl: 'http://file',
         password: 'filepw',
+        encryptionPassword: 'file-enc',
       });
 
       const config = await resolveConfig({
         serverUrl: 'http://cli',
         password: 'clipw',
+        encryptionPassword: 'cli-enc',
       });
 
       expect(config.serverUrl).toBe('http://cli');
       expect(config.password).toBe('clipw');
+      expect(config.encryptionPassword).toBe('cli-enc');
     });
 
     it('env vars override file config', async () => {
       process.env.ACTUAL_SERVER_URL = 'http://env';
       process.env.ACTUAL_PASSWORD = 'envpw';
+      process.env.ACTUAL_ENCRYPTION_PASSWORD = 'env-enc';
       mockConfigFile({
         serverUrl: 'http://file',
         password: 'filepw',
+        encryptionPassword: 'file-enc',
       });
 
       const config = await resolveConfig({});
 
       expect(config.serverUrl).toBe('http://env');
       expect(config.password).toBe('envpw');
+      expect(config.encryptionPassword).toBe('env-enc');
     });
 
     it('file config is used when no CLI opts or env vars', async () => {
@@ -85,6 +92,7 @@ describe('resolveConfig', () => {
         serverUrl: 'http://file',
         password: 'filepw',
         syncId: 'budget-1',
+        encryptionPassword: 'file-enc',
       });
 
       const config = await resolveConfig({});
@@ -92,6 +100,7 @@ describe('resolveConfig', () => {
       expect(config.serverUrl).toBe('http://file');
       expect(config.password).toBe('filepw');
       expect(config.syncId).toBe('budget-1');
+      expect(config.encryptionPassword).toBe('file-enc');
     });
   });
 
