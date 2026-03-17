@@ -280,7 +280,7 @@ export type BudgetComponents = {
   ExpenseGroupComponent: ComponentType<CategoryGroupMonthProps>;
   IncomeCategoryComponent: ComponentType<CategoryMonthProps>;
   IncomeGroupComponent: ComponentType<CategoryGroupMonthProps>;
-  BudgetTotalsComponent: ComponentType;
+  BudgetTotalsComponent: ComponentType<{ month?: string }>;
   IncomeHeaderComponent: ComponentType;
 };
 

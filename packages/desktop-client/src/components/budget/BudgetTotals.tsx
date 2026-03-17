@@ -15,6 +15,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { RenderMonths } from './RenderMonths';
+import { useScheduledAmounts } from './ScheduledAmountsContext';
 import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
@@ -36,6 +37,7 @@ export const BudgetTotals = memo(function BudgetTotals({
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const { showScheduled, toggleShowScheduled } = useScheduledAmounts();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -159,6 +161,8 @@ export const BudgetTotals = memo(function BudgetTotals({
                 expandAllCategories();
               } else if (type === 'collapseAllCategories') {
                 collapseAllCategories();
+              } else if (type === 'toggle-scheduled') {
+                toggleShowScheduled();
               }
               setMenuOpen(false);
             }}
@@ -175,12 +179,19 @@ export const BudgetTotals = memo(function BudgetTotals({
                 name: 'collapseAllCategories',
                 text: t('Collapse all'),
               },
+              Menu.line,
+              {
+                name: 'toggle-scheduled',
+                text: showScheduled
+                  ? t('Hide scheduled spending')
+                  : t('Show scheduled spending'),
+              },
             ]}
           />
         </Popover>
       </View>
       <RenderMonths>
-        <MonthComponent />
+        {({ month }) => <MonthComponent month={month} />}
       </RenderMonths>
     </View>
   );

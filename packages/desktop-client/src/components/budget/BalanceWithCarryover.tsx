@@ -99,6 +99,8 @@ type BalanceWithCarryoverProps = Omit<
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
   tooltipDisabled?: boolean;
+  /** Optional adjustment to the balance value (e.g., scheduled amounts) */
+  balanceAdjustment?: number;
 };
 
 export function BalanceWithCarryover({
@@ -111,6 +113,7 @@ export function BalanceWithCarryover({
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   tooltipDisabled,
+  balanceAdjustment = 0,
   children,
   ...props
 }: BalanceWithCarryoverProps) {
@@ -248,7 +251,12 @@ export function BalanceWithCarryover({
 
   return (
     <CellValue binding={balance} type="financial" {...props}>
-      {({ type, name, value: balanceValue }) => (
+      {({ type, name, value: rawBalanceValue }) => {
+        const balanceValue =
+          balanceAdjustment !== 0
+            ? rawBalanceValue + balanceAdjustment
+            : rawBalanceValue;
+        return (
         <>
           <Tooltip
             content={
@@ -304,7 +312,8 @@ export function BalanceWithCarryover({
               </>
             )}
         </>
-      )}
+        );
+      }}
     </CellValue>
   );
 }

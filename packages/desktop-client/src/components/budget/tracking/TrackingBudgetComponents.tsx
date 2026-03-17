@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useRef, useState } from 'react';
+import React, { memo, useMemo, useRef, useState } from 'react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -24,6 +24,7 @@ import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
 import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
+import { useScheduledAmounts } from '@desktop-client/components/budget/ScheduledAmountsContext';
 import { makeAmountGrey } from '@desktop-client/components/budget/util';
 import {
   CellValue,
@@ -70,7 +71,22 @@ const cellStyle: CSSProperties = {
   fontWeight: 600,
 };
 
-export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
+  month,
+}: {
+  month?: string;
+}) {
+  const { showScheduled, scheduledAmounts } = useScheduledAmounts();
+
+  const totalScheduledForMonth = useMemo(() => {
+    if (!showScheduled || !month) return 0;
+    let total = 0;
+    for (const [, monthMap] of scheduledAmounts) {
+      total += monthMap.get(month) || 0;
+    }
+    return total;
+  }, [showScheduled, scheduledAmounts, month]);
+
   return (
     <View
       style={{
@@ -94,10 +110,28 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
-          <Trans>Spent</Trans>
+          <Trans>{showScheduled ? 'Spent + Sched.' : 'Spent'}</Trans>
         </Text>
         <TrackingCellValue binding={trackingBudget.totalSpent} type="financial">
-          {props => <CellValueText {...props} style={cellStyle} />}
+          {props => {
+            const displayValue =
+              showScheduled && totalScheduledForMonth !== 0
+                ? props.value + totalScheduledForMonth
+                : props.value;
+            return (
+              <CellValueText
+                {...props}
+                value={displayValue}
+                style={{
+                  ...cellStyle,
+                  ...(showScheduled &&
+                    totalScheduledForMonth !== 0 && {
+                      fontStyle: 'italic',
+                    }),
+                }}
+              />
+            );
+          }}
         </TrackingCellValue>
       </View>
       <View style={headerLabelStyle}>
@@ -108,7 +142,25 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={trackingBudget.totalLeftover}
           type="financial"
         >
-          {props => <CellValueText {...props} style={cellStyle} />}
+          {props => {
+            const displayValue =
+              showScheduled && totalScheduledForMonth !== 0
+                ? props.value + totalScheduledForMonth
+                : props.value;
+            return (
+              <CellValueText
+                {...props}
+                value={displayValue}
+                style={{
+                  ...cellStyle,
+                  ...(showScheduled &&
+                    totalScheduledForMonth !== 0 && {
+                      fontStyle: 'italic',
+                    }),
+                }}
+              />
+            );
+          }}
         </TrackingCellValue>
       </View>
     </View>
@@ -142,7 +194,16 @@ export const GroupMonth = memo(function GroupMonth({
   month,
   group,
 }: CategoryGroupMonthProps) {
-  const { id } = group;
+  const { id, categories = [] } = group;
+  const { showScheduled, getScheduledAmount } = useScheduledAmounts();
+
+  const groupScheduledAmount = useMemo(() => {
+    if (!showScheduled) return 0;
+    return categories.reduce(
+      (sum, cat) => sum + getScheduledAmount(cat.id, month),
+      0,
+    );
+  }, [showScheduled, categories, getScheduledAmount, month]);
 
   return (
     <View
@@ -164,31 +225,68 @@ export const GroupMonth = memo(function GroupMonth({
           type: 'financial',
         }}
       />
-      <TrackingSheetCell
-        name="spent"
-        width="flex"
-        textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
-        valueProps={{
-          binding: trackingBudget.groupSumAmount(id),
-          type: 'financial',
-        }}
-      />
+      <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
+        <TrackingCellValue
+          binding={trackingBudget.groupSumAmount(id)}
+          type="financial"
+        >
+          {props => {
+            const displayValue =
+              showScheduled && groupScheduledAmount !== 0
+                ? props.value + groupScheduledAmount
+                : props.value;
+            return (
+              <CellValueText
+                {...props}
+                value={displayValue}
+                style={{
+                  fontWeight: 600,
+                  ...styles.tnum,
+                  ...(showScheduled &&
+                    groupScheduledAmount !== 0 && {
+                      fontStyle: 'italic',
+                    }),
+                }}
+              />
+            );
+          }}
+        </TrackingCellValue>
+      </Field>
       {!group.is_income && (
-        <TrackingSheetCell
+        <Field
           name="balance"
           width="flex"
-          textAlign="right"
           style={{
-            fontWeight: 600,
+            textAlign: 'right',
             paddingRight: styles.monthRightPadding,
-            ...styles.tnum,
           }}
-          valueProps={{
-            binding: trackingBudget.groupBalance(id),
-            type: 'financial',
-          }}
-        />
+        >
+          <TrackingCellValue
+            binding={trackingBudget.groupBalance(id)}
+            type="financial"
+          >
+            {props => {
+              const displayValue =
+                showScheduled && groupScheduledAmount !== 0
+                  ? props.value + groupScheduledAmount
+                  : props.value;
+              return (
+                <CellValueText
+                  {...props}
+                  value={displayValue}
+                  style={{
+                    fontWeight: 600,
+                    ...styles.tnum,
+                    ...(showScheduled &&
+                      groupScheduledAmount !== 0 && {
+                        fontStyle: 'italic',
+                      }),
+                  }}
+                />
+              );
+            }}
+          </TrackingCellValue>
+        </Field>
       )}
     </View>
   );
@@ -226,6 +324,9 @@ export const CategoryMonth = memo(function CategoryMonth({
     });
 
   const showScheduleIndicator = schedule && scheduleStatus;
+
+  const { showScheduled, getScheduledAmount } = useScheduledAmounts();
+  const scheduledAmount = getScheduledAmount(category.id, month);
 
   return (
     <View
@@ -417,18 +518,29 @@ export const CategoryMonth = memo(function CategoryMonth({
             binding={trackingBudget.catSumAmount(category.id)}
             type="financial"
           >
-            {props => (
-              <CellValueText
-                {...props}
-                className={css({
-                  cursor: 'pointer',
-                  ':hover': {
-                    textDecoration: 'underline',
-                  },
-                  ...makeAmountGrey(props.value),
-                })}
-              />
-            )}
+            {props => {
+              const displayValue =
+                showScheduled && scheduledAmount !== 0
+                  ? props.value + scheduledAmount
+                  : props.value;
+              return (
+                <CellValueText
+                  {...props}
+                  value={displayValue}
+                  className={css({
+                    cursor: 'pointer',
+                    ':hover': {
+                      textDecoration: 'underline',
+                    },
+                    ...makeAmountGrey(displayValue),
+                    ...(showScheduled &&
+                      scheduledAmount !== 0 && {
+                        fontStyle: 'italic',
+                      }),
+                  })}
+                />
+              );
+            }}
           </TrackingCellValue>
         </View>
       </Field>
@@ -457,6 +569,11 @@ export const CategoryMonth = memo(function CategoryMonth({
               goal={trackingBudget.catGoal(category.id)}
               budgeted={trackingBudget.catBudgeted(category.id)}
               longGoal={trackingBudget.catLongGoal(category.id)}
+              balanceAdjustment={
+                showScheduled && scheduledAmount !== 0
+                  ? scheduledAmount
+                  : 0
+              }
             />
           </Button>
 

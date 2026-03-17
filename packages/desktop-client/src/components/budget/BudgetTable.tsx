@@ -5,6 +5,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type {
   CategoryEntity,
@@ -16,6 +17,7 @@ import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
+import { ScheduledAmountsProvider } from './ScheduledAmountsContext';
 import {
   findSortDown,
   findSortUp,
@@ -219,91 +221,103 @@ export function BudgetTable(props: BudgetTableProps) {
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
-  return (
-    <View
-      data-testid="budget-table"
-      style={{
-        flex: 1,
-        ...(styles.lightScrollbar && {
-          '& ::-webkit-scrollbar': {
-            backgroundColor: 'transparent',
-          },
-          '& ::-webkit-scrollbar-thumb:vertical': {
-            backgroundColor: theme.pageTextSubdued,
-            // changed from tableHeaderBackground. pageTextSubdued is always visible on pageBackground
-          },
-        }),
-      }}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          overflow: 'hidden',
-          flexShrink: 0,
-          // This is necessary to align with the table because the
-          // table has this padding to allow the shadow to show
-          paddingLeft: 5,
-          paddingRight: 5 + getScrollbarWidth(),
-        }}
-      >
-        <View style={{ width: 200 + 100 * categoryExpandedState }} />
-        <MonthsProvider
-          startMonth={prewarmStartMonth}
-          numMonths={numMonths}
-          monthBounds={monthBounds}
-          type={type}
-        >
-          <BudgetSummaries />
-        </MonthsProvider>
-      </View>
+  // Compute the visible months for the ScheduledAmountsProvider
+  const visibleMonths = useMemo(() => {
+    const endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
+    const validStart =
+      startMonth < monthBounds.start ? monthBounds.start : startMonth;
+    const validEnd =
+      endMonth > monthBounds.end ? monthBounds.end : endMonth;
+    return monthUtils.rangeInclusive(validStart, validEnd);
+  }, [startMonth, numMonths, monthBounds]);
 
-      <MonthsProvider
-        startMonth={startMonth}
-        numMonths={numMonths}
-        monthBounds={monthBounds}
-        type={type}
-      >
-        <BudgetTotals
-          toggleHiddenCategories={toggleHiddenCategories}
-          expandAllCategories={expandAllCategories}
-          collapseAllCategories={collapseAllCategories}
-        />
+  return (
+    <SchedulesProvider query={schedulesQuery}>
+      <ScheduledAmountsProvider months={visibleMonths}>
         <View
+          data-testid="budget-table"
           style={{
-            overflowY: 'scroll',
-            overflowAnchor: 'none',
             flex: 1,
-            paddingLeft: 5,
-            paddingRight: 5,
+            ...(styles.lightScrollbar && {
+              '& ::-webkit-scrollbar': {
+                backgroundColor: 'transparent',
+              },
+              '& ::-webkit-scrollbar-thumb:vertical': {
+                backgroundColor: theme.pageTextSubdued,
+                // changed from tableHeaderBackground. pageTextSubdued is always visible on pageBackground
+              },
+            }),
           }}
         >
           <View
             style={{
+              flexDirection: 'row',
+              overflow: 'hidden',
               flexShrink: 0,
+              // This is necessary to align with the table because the
+              // table has this padding to allow the shadow to show
+              paddingLeft: 5,
+              paddingRight: 5 + getScrollbarWidth(),
             }}
-            onKeyDown={onKeyDown}
           >
-            <SchedulesProvider query={schedulesQuery}>
-              <BudgetCategories
-                categoryGroups={categoryGroups}
-                editingCell={editing}
-                onEditMonth={onEditMonth}
-                onEditName={onEditName}
-                onSaveCategory={onSaveCategory}
-                onSaveGroup={onSaveGroup}
-                onDeleteCategory={onDeleteCategory}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={_onReorderCategory}
-                onReorderGroup={_onReorderGroup}
-                onBudgetAction={onBudgetAction}
-                onShowActivity={onShowActivity}
-                onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
-              />
-            </SchedulesProvider>
+            <View style={{ width: 200 + 100 * categoryExpandedState }} />
+            <MonthsProvider
+              startMonth={prewarmStartMonth}
+              numMonths={numMonths}
+              monthBounds={monthBounds}
+              type={type}
+            >
+              <BudgetSummaries />
+            </MonthsProvider>
           </View>
+
+          <MonthsProvider
+            startMonth={startMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            type={type}
+          >
+            <BudgetTotals
+              toggleHiddenCategories={toggleHiddenCategories}
+              expandAllCategories={expandAllCategories}
+              collapseAllCategories={collapseAllCategories}
+            />
+            <View
+              style={{
+                overflowY: 'scroll',
+                overflowAnchor: 'none',
+                flex: 1,
+                paddingLeft: 5,
+                paddingRight: 5,
+              }}
+            >
+              <View
+                style={{
+                  flexShrink: 0,
+                }}
+                onKeyDown={onKeyDown}
+              >
+                <BudgetCategories
+                  categoryGroups={categoryGroups}
+                  editingCell={editing}
+                  onEditMonth={onEditMonth}
+                  onEditName={onEditName}
+                  onSaveCategory={onSaveCategory}
+                  onSaveGroup={onSaveGroup}
+                  onDeleteCategory={onDeleteCategory}
+                  onDeleteGroup={onDeleteGroup}
+                  onReorderCategory={_onReorderCategory}
+                  onReorderGroup={_onReorderGroup}
+                  onBudgetAction={onBudgetAction}
+                  onShowActivity={onShowActivity}
+                  onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+                />
+              </View>
+            </View>
+          </MonthsProvider>
         </View>
-      </MonthsProvider>
-    </View>
+      </ScheduledAmountsProvider>
+    </SchedulesProvider>
   );
 }
 
