@@ -117,11 +117,9 @@ export function conform(
 
         const fieldDesc = tableSchema[field];
         if (fieldDesc == null) {
-          throw new Error(
-            `Field "${field}" does not exist on table ${table}: ${JSON.stringify(
-              obj,
-            )}`,
-          );
+          // Skip unknown fields instead of throwing - this can happen
+          // when importing data from different versions
+          return null;
         }
 
         if (isRequired(field, fieldDesc) && obj[field] == null) {

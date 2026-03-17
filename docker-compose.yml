@@ -14,4 +14,5 @@ services:
       - '3001:3001'
     volumes:
       - '.:/app'
+      - /app/node_modules    # <-- prevents host node_modules from being mounted
     restart: 'no'

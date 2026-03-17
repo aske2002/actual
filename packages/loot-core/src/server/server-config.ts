@@ -5,6 +5,7 @@ type ServerConfig = {
   BASE_SERVER: string;
   SYNC_SERVER: string;
   SIGNUP_SERVER: string;
+  ENABLEBANKING_SERVER: string;
   GOCARDLESS_SERVER: string;
   SIMPLEFIN_SERVER: string;
   PLUGGYAI_SERVER: string;
@@ -42,6 +43,7 @@ export function getServer(url?: string): ServerConfig | null {
         BASE_SERVER: url,
         SYNC_SERVER: joinURL(url, '/sync'),
         SIGNUP_SERVER: joinURL(url, '/account'),
+        ENABLEBANKING_SERVER: joinURL(url, '/enablebanking'),
         GOCARDLESS_SERVER: joinURL(url, '/gocardless'),
         SIMPLEFIN_SERVER: joinURL(url, '/simplefin'),
         PLUGGYAI_SERVER: joinURL(url, '/pluggyai'),

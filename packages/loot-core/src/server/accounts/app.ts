@@ -14,6 +14,7 @@ import type {
   CategoryEntity,
   GoCardlessToken,
   ImportTransactionEntity,
+  SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -54,6 +55,7 @@ export type AccountHandlers = {
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
+  'enablebanking-accounts-link': typeof linkEnableBankingAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -65,8 +67,14 @@ export type AccountHandlers = {
   'gocardless-status': typeof goCardlessStatus;
   'simplefin-status': typeof simpleFinStatus;
   'pluggyai-status': typeof pluggyAiStatus;
+  'enablebanking-status': typeof enableBankingStatus;
   'simplefin-accounts': typeof simpleFinAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
+  'enablebanking-accounts': typeof enableBankingAccounts;
+  'enablebanking-get-banks': typeof getEnableBankingBanks;
+  'enablebanking-create-web-token': typeof createEnableBankingWebToken;
+  'enablebanking-poll-web-token': typeof pollEnableBankingWebToken;
+  'enablebanking-poll-web-token-stop': typeof stopEnableBankingWebTokenPolling;
   'gocardless-get-banks': typeof getGoCardlessBanks;
   'gocardless-create-web-token': typeof createGoCardlessWebToken;
   'accounts-bank-sync': typeof accountsBankSync;
@@ -332,6 +340,78 @@ async function linkPluggyAiAccount({
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
       account_sync_source: 'pluggyai',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+    startingDate,
+    startingBalance,
+  );
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+}
+
+async function linkEnableBankingAccount({
+  externalAccount,
+  upgradingId,
+  offBudget = false,
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
+  externalAccount: SyncServerEnableBankingAccount;
+}) {
+  let id;
+
+  const institution = {
+    name: externalAccount.institution ?? t('Unknown'),
+  };
+
+  const bank = await link.findOrCreateBank(
+    institution,
+    externalAccount.orgDomain ?? externalAccount.orgId,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'enableBanking',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: 'enableBanking',
     });
     await db.insertPayee({
       name: '',
@@ -777,6 +857,200 @@ async function pluggyAiAccounts() {
   }
 }
 
+async function enableBankingStatus() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.ENABLEBANKING_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+}
+
+async function enableBankingAccounts({ sessionId }: { sessionId: string }) {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  try {
+    return await post(
+      serverConfig.ENABLEBANKING_SERVER + '/accounts',
+      { sessionId },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      60000,
+    );
+  } catch {
+    return { error_code: 'TIMED_OUT' };
+  }
+}
+
+async function getEnableBankingBanks(country: string) {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.ENABLEBANKING_SERVER + '/get-banks',
+    { country },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+}
+
+async function createEnableBankingWebToken({
+  aspspName,
+  aspspCountry,
+}: {
+  aspspName: string;
+  aspspCountry: string;
+}) {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  try {
+    return await post(
+      serverConfig.ENABLEBANKING_SERVER + '/create-web-token',
+      { aspspName, aspspCountry },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+  } catch (error) {
+    logger.error(error);
+    return { error: 'failed' };
+  }
+}
+
+let stopEnableBankingPolling = false;
+
+async function pollEnableBankingWebToken({ state }: { state: string }) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return { error: 'unknown' };
+
+  const startTime = Date.now();
+  stopEnableBankingPolling = false;
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  const enableBankingServer = serverConfig.ENABLEBANKING_SERVER;
+
+  type EnableBankingAccount = {
+    account_id: string;
+    name: string;
+    institution: string;
+    mask: string | null;
+    official_name: string;
+  };
+
+  async function getData(
+    cb: (
+      data:
+        | { status: 'timeout' }
+        | { status: 'unknown'; message?: string }
+        | {
+            status: 'success';
+            data: {
+              accounts: EnableBankingAccount[];
+            };
+          },
+    ) => void,
+  ) {
+    if (stopEnableBankingPolling) {
+      return;
+    }
+
+    // 10 minute timeout
+    if (Date.now() - startTime >= 1000 * 60 * 10) {
+      cb({ status: 'timeout' });
+      return;
+    }
+
+    const data = await post(
+      enableBankingServer + '/get-accounts',
+      { state },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    if (data) {
+      if (data.error_code) {
+        cb({ status: 'unknown', message: data.error_type });
+      } else if (data.accounts) {
+        cb({ status: 'success', data });
+      } else {
+        // Not ready yet, poll again
+        setTimeout(() => getData(cb), 3000);
+      }
+    } else {
+      setTimeout(() => getData(cb), 3000);
+    }
+  }
+
+  return new Promise(resolve => {
+    void getData(data => {
+      if (data.status === 'success') {
+        resolve({ data: data.data });
+        return;
+      }
+
+      if (data.status === 'timeout') {
+        resolve({ error: data.status });
+        return;
+      }
+
+      resolve({
+        error: data.status,
+        message: data.message,
+      });
+    });
+  });
+}
+
+async function stopEnableBankingWebTokenPolling() {
+  stopEnableBankingPolling = true;
+  return 'ok';
+}
+
 async function getGoCardlessBanks(country: string) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -970,6 +1244,13 @@ async function accountsBankSync({
   const updatedAccounts: Array<AccountEntity['id']> = [];
 
   for (const acct of accounts) {
+    logger.log('Checking account for sync:', {
+      name: acct.name,
+      id: acct.id,
+      account_id: acct.account_id,
+      bankId: acct.bankId,
+      account_sync_source: acct.account_sync_source,
+    });
     if (acct.bankId && acct.account_id) {
       try {
         logger.group('Bank Sync operation for account:', acct.name);
@@ -1273,6 +1554,7 @@ app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
+app.method('enablebanking-accounts-link', linkEnableBankingAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));
@@ -1284,8 +1566,17 @@ app.method('gocardless-poll-web-token-stop', stopGoCardlessWebTokenPolling);
 app.method('gocardless-status', goCardlessStatus);
 app.method('simplefin-status', simpleFinStatus);
 app.method('pluggyai-status', pluggyAiStatus);
+app.method('enablebanking-status', enableBankingStatus);
 app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
+app.method('enablebanking-accounts', enableBankingAccounts);
+app.method('enablebanking-get-banks', getEnableBankingBanks);
+app.method('enablebanking-create-web-token', createEnableBankingWebToken);
+app.method('enablebanking-poll-web-token', pollEnableBankingWebToken);
+app.method(
+  'enablebanking-poll-web-token-stop',
+  stopEnableBankingWebTokenPolling,
+);
 app.method('gocardless-get-banks', getGoCardlessBanks);
 app.method('gocardless-create-web-token', createGoCardlessWebToken);
 app.method('accounts-bank-sync', accountsBankSync);

@@ -8,6 +8,8 @@ import { getAccountDb } from '../account-db';
  * @enum {string}
  */
 export const SecretName = {
+  enablebanking_applicationId: 'enablebanking_applicationId',
+  enablebanking_privateKey: 'enablebanking_privateKey',
   gocardless_secretId: 'gocardless_secretId',
   gocardless_secretKey: 'gocardless_secretKey',
   simplefin_token: 'simplefin_token',
