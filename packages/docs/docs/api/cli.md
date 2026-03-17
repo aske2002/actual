@@ -352,5 +352,5 @@ actual transactions add --account <id> --data '[{"date":"2026-03-14","amount":-2
 ## Error Handling
 
 - Non-zero exit codes indicate an error
-- Error output is JSON on stdout: `{"error": "message"}`
+- Errors are written as plain text to stderr (e.g., `Error: message`)
 - Use `--verbose` to enable informational stderr messages for debugging

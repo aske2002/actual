@@ -27,6 +27,7 @@ describe('resolveConfig', () => {
     'ACTUAL_SESSION_TOKEN',
     'ACTUAL_SYNC_ID',
     'ACTUAL_DATA_DIR',
+    'ACTUAL_ENCRYPTION_PASSWORD',
   ];
 
   beforeEach(() => {

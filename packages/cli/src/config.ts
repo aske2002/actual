@@ -32,6 +32,39 @@ type ConfigFileContent = {
   encryptionPassword?: string;
 };
 
+const configFileKeys: readonly string[] = [
+  'serverUrl',
+  'password',
+  'sessionToken',
+  'syncId',
+  'dataDir',
+  'encryptionPassword',
+];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function validateConfigFileContent(value: unknown): ConfigFileContent {
+  if (!isRecord(value)) {
+    throw new Error(
+      'Invalid config file: expected an object with keys: ' +
+        configFileKeys.join(', '),
+    );
+  }
+  for (const key of Object.keys(value)) {
+    if (!configFileKeys.includes(key)) {
+      throw new Error(`Invalid config file: unknown key "${key}"`);
+    }
+    if (value[key] !== undefined && typeof value[key] !== 'string') {
+      throw new Error(
+        `Invalid config file: key "${key}" must be a string, got ${typeof value[key]}`,
+      );
+    }
+  }
+  return value as ConfigFileContent;
+}
+
 async function loadConfigFile(): Promise<ConfigFileContent> {
   const explorer = cosmiconfig('actual', {
     searchPlaces: [
@@ -47,7 +80,7 @@ async function loadConfigFile(): Promise<ConfigFileContent> {
   });
   const result = await explorer.search();
   if (result && !result.isEmpty) {
-    return result.config as ConfigFileContent;
+    return validateConfigFileContent(result.config);
   }
   return {};
 }
